@@ -258,7 +258,7 @@ def run_module():
                 else:
                     # Add ID to payload for update
                     payload["uuid"] = resource_id
-                    response = client.update("/api/config-profiles/{uuid}", payload, resource_id)
+                    response = client.update("/api/config-profiles", payload, resource_id)
                     result["changed"] = True
                     result["response"] = camel_to_snake_dict(response)
                     result["msg"] = "Config Profile updated successfully"

@@ -66,7 +66,7 @@ modules:
         method: POST
         dto: CreateConfigProfileRequestDto
       update:
-        path: /api/config-profiles/{uuid}
+        path: /api/config-profiles
         method: PATCH
         dto: UpdateConfigProfileRequestDto
       get_all:
