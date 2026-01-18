@@ -1,0 +1,74 @@
+services:
+  remnawave-db:
+    image: postgres:17.2-alpine
+    container_name: remnawave-db
+    hostname: remnawave-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+    volumes:
+      - remnawave-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  remnawave-redis:
+    image: valkey/valkey:8.1-alpine
+    container_name: remnawave-redis
+    hostname: remnawave-redis
+    volumes:
+      - remnawave-redis-data:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  remnawave-backend:
+    image: remnawave/backend:latest
+    container_name: remnawave-backend
+    hostname: remnawave-backend
+    depends_on:
+      remnawave-db:
+        condition: service_healthy
+      remnawave-redis:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      APP_PORT: ${APP_PORT:-3000}
+      METRICS_PORT: ${METRICS_PORT:-3001}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@remnawave-db:5432/postgres}
+      REDIS_HOST: ${REDIS_HOST:-remnawave-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      JWT_AUTH_SECRET: ${JWT_AUTH_SECRET}
+      JWT_API_TOKENS_SECRET: ${JWT_API_TOKENS_SECRET}
+      FRONT_END_DOMAIN: ${FRONT_END_DOMAIN:-*}
+      SUB_PUBLIC_DOMAIN: ${SUB_PUBLIC_DOMAIN:-localhost/api/sub}
+      METRICS_USER: ${METRICS_USER:-e2e_metrics}
+      METRICS_PASS: ${METRICS_PASS:-e2e_metrics_pass}
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # Reverse proxy that adds required headers for Remnawave API
+  remnawave-proxy:
+    image: caddy:2-alpine
+    container_name: remnawave-proxy
+    hostname: remnawave-proxy
+    depends_on:
+      remnawave-backend:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    command: ["caddy", "reverse-proxy", "--from", ":8080", "--to", "remnawave-backend:3000", "--header-up", "X-Forwarded-Proto: https", "--header-up", "X-Forwarded-For: 127.0.0.1"]
+
+volumes:
+  remnawave-db-data:
+  remnawave-redis-data:

@@ -1,0 +1,18 @@
+---
+- name: Prepare E2E environment
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Verify API token file exists
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/.api-token"
+      register: token_file
+
+    - name: Fail if API token file not found
+      ansible.builtin.fail:
+        msg: "API token file not found. Run create step first."
+      when: not token_file.stat.exists
+
+    - name: Display readiness status
+      ansible.builtin.debug:
+        msg: "E2E environment is ready for testing"

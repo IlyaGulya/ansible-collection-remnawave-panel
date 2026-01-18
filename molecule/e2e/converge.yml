@@ -1,0 +1,223 @@
+---
+- name: Converge - E2E Tests
+  hosts: localhost
+  gather_facts: false
+  vars:
+    api_url: "http://localhost:8080"
+    api_token: "{{ lookup('file', playbook_dir + '/.api-token') | trim }}"
+    # Minimal valid Xray config - must have at least one inbound
+    test_config:
+      log:
+        loglevel: info
+      inbounds:
+        - tag: TestInbound
+          port: 10000
+          protocol: shadowsocks
+          settings:
+            clients: []
+            network: tcp,udp
+          sniffing:
+            enabled: true
+            destOverride:
+              - http
+              - tls
+      outbounds:
+        - tag: DIRECT
+          protocol: freedom
+      routing:
+        rules: []
+  collections:
+    - remnawave.panel
+
+  tasks:
+    # ===========================================
+    # Test Config Profile CRUD
+    # ===========================================
+
+    - name: Create a config profile
+      remnawave.panel.rw_config_profile:
+        api_url: "{{ api_url }}"
+        api_token: "{{ api_token }}"
+        state: present
+        name: "E2E Test Profile"
+        config: "{{ test_config }}"
+      register: create_profile_result
+
+    - name: Assert config profile was created
+      ansible.builtin.assert:
+        that:
+          - create_profile_result.changed
+          - create_profile_result.response is defined
+          - create_profile_result.response.uuid is defined
+        fail_msg: "Config profile creation failed"
+
+    - name: Create same config profile again (idempotency test)
+      remnawave.panel.rw_config_profile:
+        api_url: "{{ api_url }}"
+        api_token: "{{ api_token }}"
+        state: present
+        name: "E2E Test Profile"
+        config: "{{ test_config }}"
+      register: idempotent_profile_result
+
+    - name: Assert config profile is idempotent
+      ansible.builtin.assert:
+        that:
+          - not idempotent_profile_result.changed
+        fail_msg: "Config profile should be idempotent"
+
+    # Extract inbound UUID for node tests
+    - name: Set profile and inbound UUIDs
+      ansible.builtin.set_fact:
+        profile_uuid: "{{ create_profile_result.response.uuid }}"
+        inbound_uuid: "{{ create_profile_result.response.inbounds[0].uuid }}"
+
+    # ===========================================
+    # Test Node CRUD
+    # ===========================================
+
+    - name: Create a node
+      remnawave.panel.rw_node:
+        api_url: "{{ api_url }}"
+        api_token: "{{ api_token }}"
+        state: present
+        name: "E2E Test Node"
+        address: "10.0.0.1"
+        port: 443
+        config_profile:
+          active_config_profile_uuid: "{{ profile_uuid }}"
+          active_inbounds:
+            - "{{ inbound_uuid }}"
+      register: create_node_result
+
+    - name: Assert node was created
+      ansible.builtin.assert:
+        that:
+          - create_node_result.changed
+          - create_node_result.response is defined
+        fail_msg: "Node creation failed"
+
+    - name: Create same node again (idempotency test)
+      remnawave.panel.rw_node:
+        api_url: "{{ api_url }}"
+        api_token: "{{ api_token }}"
+        state: present
+        name: "E2E Test Node"
+        address: "10.0.0.1"
+        port: 443
+        config_profile:
+          active_config_profile_uuid: "{{ profile_uuid }}"
+          active_inbounds:
+            - "{{ inbound_uuid }}"
+      register: idempotent_node_result
+
+    - name: Assert node is idempotent
+      ansible.builtin.assert:
+        that:
+          - not idempotent_node_result.changed
+        fail_msg: "Node should be idempotent"
+
+    - name: Update node address
+      remnawave.panel.rw_node:
+        api_url: "{{ api_url }}"
+        api_token: "{{ api_token }}"
+        state: present
+        name: "E2E Test Node"
+        address: "10.0.0.2"
+        port: 443
+        config_profile:
+          active_config_profile_uuid: "{{ profile_uuid }}"
+          active_inbounds:
+            - "{{ inbound_uuid }}"
+      register: update_node_result
+
+    - name: Assert node was updated
+      ansible.builtin.assert:
+        that:
+          - update_node_result.changed
+        fail_msg: "Node update failed"
+
+    # ===========================================
+    # Test Check Mode
+    # ===========================================
+
+    - name: Create node in check mode
+      remnawave.panel.rw_node:
+        api_url: "{{ api_url }}"
+        api_token: "{{ api_token }}"
+        state: present
+        name: "Check Mode Node"
+        address: "10.0.0.100"
+        config_profile:
+          active_config_profile_uuid: "{{ profile_uuid }}"
+          active_inbounds:
+            - "{{ inbound_uuid }}"
+      check_mode: true
+      register: check_mode_result
+
+    - name: Assert check mode reports changed
+      ansible.builtin.assert:
+        that:
+          - check_mode_result.changed
+          - check_mode_result.diff is defined
+        fail_msg: "Check mode should report changed for new resource"
+
+    # ===========================================
+    # Test Delete Operations
+    # ===========================================
+
+    - name: Delete test node
+      remnawave.panel.rw_node:
+        api_url: "{{ api_url }}"
+        api_token: "{{ api_token }}"
+        state: absent
+        name: "E2E Test Node"
+      register: delete_node_result
+
+    - name: Assert node was deleted
+      ansible.builtin.assert:
+        that:
+          - delete_node_result.changed
+        fail_msg: "Node deletion should report changed"
+
+    - name: Delete node again (idempotency test)
+      remnawave.panel.rw_node:
+        api_url: "{{ api_url }}"
+        api_token: "{{ api_token }}"
+        state: absent
+        name: "E2E Test Node"
+      register: delete_node_idempotent_result
+
+    - name: Assert node deletion is idempotent
+      ansible.builtin.assert:
+        that:
+          - not delete_node_idempotent_result.changed
+        fail_msg: "Node deletion should be idempotent"
+
+    - name: Delete test config profile
+      remnawave.panel.rw_config_profile:
+        api_url: "{{ api_url }}"
+        api_token: "{{ api_token }}"
+        state: absent
+        name: "E2E Test Profile"
+      register: delete_profile_result
+
+    - name: Assert config profile was deleted
+      ansible.builtin.assert:
+        that:
+          - delete_profile_result.changed
+        fail_msg: "Config profile deletion should report changed"
+
+    - name: Delete config profile again (idempotency test)
+      remnawave.panel.rw_config_profile:
+        api_url: "{{ api_url }}"
+        api_token: "{{ api_token }}"
+        state: absent
+        name: "E2E Test Profile"
+      register: delete_profile_idempotent_result
+
+    - name: Assert config profile deletion is idempotent
+      ansible.builtin.assert:
+        that:
+          - not delete_profile_idempotent_result.changed
+        fail_msg: "Config profile deletion should be idempotent"

@@ -1,0 +1,81 @@
+general:
+  spec_file: "api-spec/api-1.yaml"
+  output_dir: "collection/plugins/modules"
+  module_utils_dir: "collection/plugins/module_utils"
+
+# Read-only fields that should be excluded from comparison during idempotency checks
+read_only_fields:
+  - uuid
+  - createdAt
+  - updatedAt
+  - isConnected
+  - isConnecting
+  - isDisabled
+  - lastStatusChange
+  - lastStatusMessage
+  - xrayVersion
+  - usersOnline
+  - cpuCount
+  - cpuModel
+  - totalRam
+  - publicIp
+  - isXrayRunning
+  - viewPosition
+  - nodesCount
+  - totalUsedTrafficBytes
+  - usedTrafficBytes
+  # activeInbounds is not returned by the API in node responses
+  - activeInbounds
+
+modules:
+  - name: rw_node
+    resource_name: Node
+    description: Manage Remnawave panel nodes
+    controller_tag: "Nodes Controller"
+    id_param: uuid
+    lookup_field: name
+    endpoints:
+      create:
+        path: /api/nodes
+        method: POST
+        dto: CreateNodeRequestDto
+      update:
+        path: /api/nodes
+        method: PATCH
+        dto: UpdateNodeRequestDto
+      get_all:
+        path: /api/nodes
+        method: GET
+        response_dto: GetAllNodesResponseDto
+      get_one:
+        path: /api/nodes/{uuid}
+        method: GET
+      delete:
+        path: /api/nodes/{uuid}
+        method: DELETE
+
+  - name: rw_config_profile
+    resource_name: Config Profile
+    description: Manage Remnawave panel configuration profiles
+    controller_tag: "Config Profiles Controller"
+    id_param: uuid
+    lookup_field: name
+    endpoints:
+      create:
+        path: /api/config-profiles
+        method: POST
+        dto: CreateConfigProfileRequestDto
+      update:
+        path: /api/config-profiles/{uuid}
+        method: PATCH
+        dto: UpdateConfigProfileRequestDto
+      get_all:
+        path: /api/config-profiles
+        method: GET
+        response_dto: GetConfigProfilesResponseDto
+      get_one:
+        path: /api/config-profiles/{uuid}
+        method: GET
+      delete:
+        path: /api/config-profiles/{uuid}
+        method: DELETE

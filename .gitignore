@@ -1,0 +1,12 @@
+# Development
+.claudetmp
+.venv/
+.ruff_cache/
+.idea/
+__pycache__/
+*.pyc
+
+# E2E test generated files
+molecule/e2e/.env.e2e
+molecule/e2e/.api-token
+molecule/e2e/docker-logs.txt

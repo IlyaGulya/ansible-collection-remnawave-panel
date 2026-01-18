@@ -1,0 +1,42 @@
+---
+- name: Verify E2E cleanup
+  hosts: localhost
+  gather_facts: false
+  vars:
+    api_url: "http://localhost:8080"
+    api_token: "{{ lookup('file', playbook_dir + '/.api-token') | trim }}"
+  collections:
+    - remnawave.panel
+
+  tasks:
+    - name: Verify test node was cleaned up
+      remnawave.panel.rw_node:
+        api_url: "{{ api_url }}"
+        api_token: "{{ api_token }}"
+        state: absent
+        name: "E2E Test Node"
+      register: verify_node_cleanup
+
+    - name: Assert test node does not exist
+      ansible.builtin.assert:
+        that:
+          - not verify_node_cleanup.changed
+        fail_msg: "Test node should have been cleaned up"
+
+    - name: Verify test config profile was cleaned up
+      remnawave.panel.rw_config_profile:
+        api_url: "{{ api_url }}"
+        api_token: "{{ api_token }}"
+        state: absent
+        name: "E2E Test Profile"
+      register: verify_profile_cleanup
+
+    - name: Assert test config profile does not exist
+      ansible.builtin.assert:
+        that:
+          - not verify_profile_cleanup.changed
+        fail_msg: "Test config profile should have been cleaned up"
+
+    - name: E2E tests completed successfully
+      ansible.builtin.debug:
+        msg: "All E2E tests passed and resources cleaned up"

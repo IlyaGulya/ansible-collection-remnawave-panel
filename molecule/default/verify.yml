@@ -1,0 +1,43 @@
+---
+- name: Verify
+  hosts: localhost
+  gather_facts: false
+  vars:
+    api_url: "http://localhost:4010"
+    api_token: "test-token"
+  collections:
+    - remnawave.panel
+
+  tasks:
+    - name: Verify node exists
+      remnawave.panel.rw_node:
+        api_url: "{{ api_url }}"
+        api_token: "{{ api_token }}"
+        state: present
+        name: "Test Node"
+        address: "10.0.0.2"
+        config_profile:
+          active_config_profile_uuid: "00000000-0000-0000-0000-000000000000"
+          active_inbounds: []
+      register: verify_node
+
+    - name: Assert node exists and is idempotent
+      ansible.builtin.assert:
+        that:
+          - not verify_node.changed
+        fail_msg: "Node verification failed - resource should exist"
+
+    - name: Verify config profile exists
+      remnawave.panel.rw_config_profile:
+        api_url: "{{ api_url }}"
+        api_token: "{{ api_token }}"
+        state: present
+        name: "Test Profile"
+        config: {}
+      register: verify_profile
+
+    - name: Assert config profile exists and is idempotent
+      ansible.builtin.assert:
+        that:
+          - not verify_profile.changed
+        fail_msg: "Config profile verification failed - resource should exist"

@@ -1,0 +1,32 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: default
+platforms:
+  - name: localhost
+    localhost: true
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_COLLECTIONS_PATH: "~/.ansible/collections"
+  inventory:
+    host_vars:
+      localhost:
+        ansible_connection: local
+        ansible_python_interpreter: "{{ ansible_playbook_python }}"
+        api_url: "http://localhost:8080"
+        api_token: "{{ lookup('file', '${MOLECULE_SCENARIO_DIRECTORY}/.api-token') | trim }}"
+verifier:
+  name: ansible
+scenario:
+  name: e2e
+  test_sequence:
+    - dependency
+    - syntax
+    - create
+    - prepare
+    - converge
+    # idempotence removed: converge includes delete tests and tests idempotency inline
+    - verify
+    - destroy
