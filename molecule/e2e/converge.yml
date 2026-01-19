@@ -557,6 +557,79 @@
         fail_msg: "Node creation with short name should fail"
 
     # ===========================================
+    # Section 10.5: Config Profile Name Resolution Tests
+    # ===========================================
+
+    - name: Create node using config profile NAME (not UUID)
+      remnawave.panel.rw_node:
+        api_url: "{{ api_url }}"
+        api_token: "{{ api_token }}"
+        state: present
+        name: "Name Lookup Test Node"
+        address: "10.0.0.200"
+        port: 443
+        config_profile:
+          active_config_profile: "E2E Test Profile"
+          active_inbounds:
+            - "{{ inbound_uuid }}"
+      register: name_lookup_result
+
+    - name: Assert node with profile name was created
+      ansible.builtin.assert:
+        that:
+          - name_lookup_result.changed
+          - name_lookup_result.response.uuid is defined
+        fail_msg: "Node creation with profile name lookup failed"
+
+    - name: Create same node again (idempotency with name lookup)
+      remnawave.panel.rw_node:
+        api_url: "{{ api_url }}"
+        api_token: "{{ api_token }}"
+        state: present
+        name: "Name Lookup Test Node"
+        address: "10.0.0.200"
+        port: 443
+        config_profile:
+          active_config_profile: "E2E Test Profile"
+          active_inbounds:
+            - "{{ inbound_uuid }}"
+      register: name_lookup_idempotent
+
+    - name: Assert name lookup is idempotent
+      ansible.builtin.assert:
+        that:
+          - not name_lookup_idempotent.changed
+        fail_msg: "Node with profile name lookup should be idempotent"
+
+    - name: Test error when config profile name not found
+      remnawave.panel.rw_node:
+        api_url: "{{ api_url }}"
+        api_token: "{{ api_token }}"
+        state: present
+        name: "Nonexistent Profile Node"
+        address: "10.0.0.201"
+        port: 443
+        config_profile:
+          active_config_profile: "Nonexistent Profile Name"
+          active_inbounds: []
+      ignore_errors: true
+      register: not_found_result
+
+    - name: Assert not found error
+      ansible.builtin.assert:
+        that:
+          - not_found_result.failed
+          - "'not found' in not_found_result.msg"
+        fail_msg: "Should fail when config profile name is not found"
+
+    - name: Cleanup name lookup test node
+      remnawave.panel.rw_node:
+        api_url: "{{ api_url }}"
+        api_token: "{{ api_token }}"
+        state: absent
+        name: "Name Lookup Test Node"
+
+    # ===========================================
     # Section 11: Cleanup - Delete Operations
     # ===========================================
 

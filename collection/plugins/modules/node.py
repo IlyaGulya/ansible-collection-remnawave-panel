@@ -209,6 +209,7 @@ from ansible_collections.remnawave.panel.plugins.module_utils.remnawave import (
     RemnawaveClient,
     camel_to_snake_dict,
     recursive_diff,
+    resolve_config_profile_uuid,
     snake_to_camel_dict,
 )
 
@@ -321,6 +322,23 @@ def run_module():
         api_token=module.params["api_token"],
         module=module,
     )
+
+    # Resolve config profile name to UUID if specified
+    if module.params.get("config_profile"):
+        cp = module.params["config_profile"]
+        name_val = cp.get("active_config_profile")
+        uuid_val = cp.get("active_config_profile_uuid")
+
+        if name_val and uuid_val:
+            module.fail_json(msg="Cannot specify both active_config_profile and active_config_profile_uuid")
+
+        if name_val:
+            resolved_uuid = resolve_config_profile_uuid(client, name_val)
+            if not resolved_uuid:
+                module.fail_json(msg=f"Config profile '{name_val}' not found")
+            # Replace name with resolved UUID
+            module.params["config_profile"]["active_config_profile_uuid"] = resolved_uuid
+            del module.params["config_profile"]["active_config_profile"]
 
     state = module.params["state"]
     resource_id = module.params.get("uuid")

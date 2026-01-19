@@ -43,6 +43,7 @@ discovery:
 # Per-module overrides (only when auto-detection is wrong)
 module_overrides:
   node:
+    resolve_uuid_by_name: true  # Enable name→UUID resolution for config profiles
     read_only_fields:
       # Additional response-only fields
       - nodeVersion

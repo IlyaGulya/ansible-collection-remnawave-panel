@@ -226,3 +226,21 @@ class RemnawaveClient:
         """Delete a resource by ID."""
         path = path_template.replace("{uuid}", resource_id)
         return self._request("DELETE", path)
+
+
+def resolve_config_profile_uuid(client, profile_name):
+    """
+    Resolve a config profile name to its UUID.
+
+    Args:
+        client: RemnawaveClient instance
+        profile_name: The name of the config profile to resolve
+
+    Returns:
+        The UUID of the config profile if found, None otherwise
+    """
+    profiles = client.get_all("/api/config-profiles")
+    for profile in profiles:
+        if profile.get("name") == profile_name:
+            return profile.get("uuid")
+    return None

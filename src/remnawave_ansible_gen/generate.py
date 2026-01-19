@@ -42,6 +42,7 @@ class DiscoveredResource:
     endpoints: dict[str, DiscoveredEndpoint] = field(default_factory=dict)
     fields: list[dict[str, Any]] = field(default_factory=list)
     read_only_fields: list[str] = field(default_factory=list)
+    resolve_uuid_by_name: bool = False  # Enable config profile name resolution
 
 
 def to_snake_case(name: str) -> str:
@@ -477,6 +478,8 @@ def apply_overrides(
         resource.id_param = module_override["id_param"]
     if "description" in module_override:
         resource.description = module_override["description"]
+    if module_override.get("resolve_uuid_by_name"):
+        resource.resolve_uuid_by_name = True
 
     return resource
 
@@ -518,6 +521,7 @@ def discovered_to_module_config(resource: DiscoveredResource) -> dict[str, Any]:
         "id_param": resource.id_param,
         "lookup_field": resource.lookup_field,
         "endpoints": endpoints,
+        "resolve_uuid_by_name": resource.resolve_uuid_by_name,
     }
 
 
@@ -557,6 +561,7 @@ def render_module(
         fields=fields,
         update_fields=update_fields if update_fields else fields,
         read_only_fields=read_only_fields,
+        resolve_uuid_by_name=module_config.get("resolve_uuid_by_name", False),
         to_snake_case=to_snake_case,
         to_camel_case=to_camel_case,
     )
