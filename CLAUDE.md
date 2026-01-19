@@ -15,6 +15,9 @@ uv sync --all-extras
 # Run the code generator (regenerates modules from OpenAPI spec)
 uv run generate
 
+# Preview what modules would be generated without writing files
+uv run generate --dry-run
+
 # Run linter on generator code
 uv run ruff check src/
 
@@ -45,9 +48,14 @@ bash scripts/e2e-teardown.sh         # Cleanup when done
 ```
 api-spec/api-1.yaml (OpenAPI spec)
          ↓
-src/remnawave_ansible_gen/config.yaml (module definitions + read-only fields)
+    Auto-Discovery (generate.py)
+    - Groups operations by controller tag
+    - Classifies endpoints (create/update/get_all/get_one/delete)
+    - Detects id_param from path parameters
+    - Detects lookup_field from Create DTO constraints
+    - Computes read_only_fields (response fields - create fields)
          ↓
-src/remnawave_ansible_gen/generate.py (generator)
+src/remnawave_ansible_gen/config.yaml (overrides only)
          ↓
 src/remnawave_ansible_gen/templates/*.j2 (Jinja2 templates)
          ↓
@@ -57,10 +65,13 @@ collection/plugins/module_utils/remnawave.py (generated shared utilities)
 
 ### Key Files
 
-- **`src/remnawave_ansible_gen/config.yaml`**: Defines modules to generate, their endpoints, and `read_only_fields` excluded from idempotency checks
-- **`src/remnawave_ansible_gen/generate.py`**: Parses OpenAPI spec and renders Jinja2 templates
+- **`src/remnawave_ansible_gen/config.yaml`**: Minimal config with:
+  - `discovery.include_controllers` / `exclude_controllers` - which controllers to generate
+  - `read_only_fields` - global fields excluded from idempotency checks
+  - `module_overrides` - per-module fixes for edge cases (extra read_only_fields, custom descriptions)
+- **`src/remnawave_ansible_gen/generate.py`**: Auto-discovers module config from OpenAPI spec patterns, then renders Jinja2 templates
 - **`collection/plugins/module_utils/remnawave.py`**: Generated HTTP client with `get_all()` that extracts lists from nested API responses, plus `recursive_diff()` for idempotency
-- **`collection/plugins/modules/rw_*.py`**: Generated Ansible modules (DO NOT EDIT - regenerate instead)
+- **`collection/plugins/modules/*.py`**: Generated Ansible modules (DO NOT EDIT - regenerate instead)
 
 ### Testing Infrastructure
 

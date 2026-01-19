@@ -1,11 +1,12 @@
 namespace: remnawave
 name: panel
-version: 1.0.0
+version: 2.5.3
 readme: README.md
 authors:
   - Remnawave Contributors
 description: Ansible collection for managing Remnawave panel resources
-license_file: LICENSE
+license:
+  - MIT
 dependencies: {}
 repository: https://github.com/remnawave/ansible-collection
 documentation: https://github.com/remnawave/ansible-collection
