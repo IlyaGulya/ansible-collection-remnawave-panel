@@ -918,7 +918,7 @@ def main() -> int:
         # List example files that would be generated
         examples_config = config.get("examples", {})
         if examples_config.get("enabled", True):
-            examples_dir = config.get("examples", {}).get("output_dir", "collection/examples")
+            examples_dir = config.get("examples", {}).get("output_dir", "ansible_collections/remnawave/panel/examples")
             example_files = list_example_files(resources)
             print(f"\nExample files to generate in {examples_dir}/:")
             for example_file in example_files:
@@ -979,7 +979,7 @@ def main() -> int:
     # Generate example playbooks
     examples_config = config.get("examples", {})
     if examples_config.get("enabled", True):
-        examples_dir = project_root / examples_config.get("output_dir", "collection/examples")
+        examples_dir = project_root / examples_config.get("output_dir", "ansible_collections/remnawave/panel/examples")
         print(f"\nGenerating example playbooks in {examples_dir}...")
         try:
             generated_examples = render_examples(env, resources, examples_dir, spec, config)

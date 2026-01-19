@@ -44,9 +44,10 @@ uv run molecule verify -s e2e        # Run verify only
 bash scripts/e2e-teardown.sh         # Cleanup when done
 
 # Run Ansible sanity tests on collection
-mkdir -p /tmp/ansible_collections/remnawave
-cp -r collection /tmp/ansible_collections/remnawave/panel
-cd /tmp/ansible_collections/remnawave/panel && ansible-test sanity --docker default
+cd ansible_collections/remnawave/panel && ansible-test sanity --docker default
+
+# Run Ansible unit tests on collection
+cd ansible_collections/remnawave/panel && ansible-test units --docker default -v
 ```
 
 ## Architecture
@@ -67,8 +68,8 @@ src/remnawave_ansible_gen/config.yaml (overrides only)
          ↓
 src/remnawave_ansible_gen/templates/*.j2 (Jinja2 templates)
          ↓
-collection/plugins/modules/*.py (generated Ansible modules)
-collection/plugins/module_utils/remnawave.py (generated shared utilities)
+ansible_collections/remnawave/panel/plugins/modules/*.py (generated Ansible modules)
+ansible_collections/remnawave/panel/plugins/module_utils/remnawave.py (generated shared utilities)
 ```
 
 ### Key Files
@@ -78,8 +79,9 @@ collection/plugins/module_utils/remnawave.py (generated shared utilities)
   - `read_only_fields` - global fields excluded from idempotency checks
   - `module_overrides` - per-module fixes for edge cases (extra read_only_fields, custom descriptions)
 - **`src/remnawave_ansible_gen/generate.py`**: Auto-discovers module config from OpenAPI spec patterns, then renders Jinja2 templates
-- **`collection/plugins/module_utils/remnawave.py`**: Generated HTTP client with `get_all()` that extracts lists from nested API responses, plus `recursive_diff()` for idempotency
-- **`collection/plugins/modules/*.py`**: Generated Ansible modules (DO NOT EDIT - regenerate instead)
+- **`ansible_collections/remnawave/panel/plugins/module_utils/remnawave.py`**: Generated HTTP client with `get_all()` that extracts lists from nested API responses, plus `recursive_diff()` for idempotency
+- **`ansible_collections/remnawave/panel/plugins/modules/*.py`**: Generated Ansible modules (DO NOT EDIT - regenerate instead)
+- **`ansible_collections/remnawave/panel/tests/unit/`**: Unit tests for module_utils
 
 ### Testing Infrastructure
 

@@ -10,3 +10,6 @@ __pycache__/
 molecule/e2e/.env.e2e
 molecule/e2e/.api-token
 molecule/e2e/docker-logs.txt
+
+# Ansible test output
+**/tests/output/

@@ -1,0 +1,4 @@
+plugins/modules/config_profile.py pylint:repeated-keyword
+plugins/modules/node.py pylint:repeated-keyword
+plugins/modules/config_profile.py validate-modules:missing-gplv3-license
+plugins/modules/node.py validate-modules:missing-gplv3-license

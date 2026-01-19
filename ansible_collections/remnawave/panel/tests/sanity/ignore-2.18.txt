@@ -1,0 +1,6 @@
+plugins/module_utils/remnawave.py pylint:too-many-instance-attributes
+plugins/module_utils/remnawave.py pylint:too-many-arguments
+plugins/modules/config_profile.py pylint:repeated-keyword
+plugins/modules/node.py pylint:repeated-keyword
+plugins/modules/config_profile.py validate-modules:missing-gplv3-license
+plugins/modules/node.py validate-modules:missing-gplv3-license

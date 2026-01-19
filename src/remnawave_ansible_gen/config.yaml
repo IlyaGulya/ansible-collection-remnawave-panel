@@ -1,11 +1,11 @@
 general:
   spec_file: "api-spec/api-1.yaml"
-  output_dir: "collection/plugins/modules"
-  module_utils_dir: "collection/plugins/module_utils"
+  output_dir: "ansible_collections/remnawave/panel/plugins/modules"
+  module_utils_dir: "ansible_collections/remnawave/panel/plugins/module_utils"
 
 # Example playbook generation settings
 examples:
-  output_dir: "collection/examples"
+  output_dir: "ansible_collections/remnawave/panel/examples"
   enabled: true
 
 # Global read-only fields excluded from comparison during idempotency checks
