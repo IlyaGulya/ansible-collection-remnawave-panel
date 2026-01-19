@@ -210,6 +210,7 @@ from ansible_collections.remnawave.panel.plugins.module_utils.remnawave import (
     camel_to_snake_dict,
     recursive_diff,
     resolve_config_profile_uuid,
+    resolve_inbound_uuids,
     snake_to_camel_dict,
 )
 
@@ -339,6 +340,24 @@ def run_module():
             # Replace name with resolved UUID
             module.params["config_profile"]["active_config_profile_uuid"] = resolved_uuid
             del module.params["config_profile"]["active_config_profile"]
+
+        # Resolve inbound tags to UUIDs if specified
+        profile_uuid = module.params["config_profile"].get("active_config_profile_uuid")
+        inbound_tags = cp.get("active_inbound_tags")
+        inbound_uuids = cp.get("active_inbounds")
+
+        if inbound_tags and inbound_uuids:
+            module.fail_json(msg="Cannot specify both active_inbound_tags and active_inbounds")
+
+        if inbound_tags:
+            if not profile_uuid:
+                module.fail_json(msg="active_inbound_tags requires active_config_profile or active_config_profile_uuid")
+            try:
+                resolved_uuids = resolve_inbound_uuids(client, profile_uuid, inbound_tags)
+                module.params["config_profile"]["active_inbounds"] = resolved_uuids
+                del module.params["config_profile"]["active_inbound_tags"]
+            except ValueError as e:
+                module.fail_json(msg=str(e))
 
     state = module.params["state"]
     resource_id = module.params.get("uuid")

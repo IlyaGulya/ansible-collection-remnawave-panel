@@ -630,6 +630,80 @@
         name: "Name Lookup Test Node"
 
     # ===========================================
+    # Section 10.6: Inbound Tag Resolution Tests
+    # ===========================================
+
+    - name: Create node using inbound TAG (not UUID)
+      remnawave.panel.rw_node:
+        api_url: "{{ api_url }}"
+        api_token: "{{ api_token }}"
+        state: present
+        name: "Inbound Tag Test Node"
+        address: "10.0.0.202"
+        port: 443
+        config_profile:
+          active_config_profile: "E2E Test Profile"
+          active_inbound_tags:
+            - "UpdatedInbound"
+      register: inbound_tag_result
+
+    - name: Assert node with inbound tag was created
+      ansible.builtin.assert:
+        that:
+          - inbound_tag_result.changed
+          - inbound_tag_result.response.uuid is defined
+        fail_msg: "Node creation with inbound tag lookup failed"
+
+    - name: Create same node again (idempotency with inbound tag)
+      remnawave.panel.rw_node:
+        api_url: "{{ api_url }}"
+        api_token: "{{ api_token }}"
+        state: present
+        name: "Inbound Tag Test Node"
+        address: "10.0.0.202"
+        port: 443
+        config_profile:
+          active_config_profile: "E2E Test Profile"
+          active_inbound_tags:
+            - "UpdatedInbound"
+      register: inbound_tag_idempotent
+
+    - name: Assert inbound tag lookup is idempotent
+      ansible.builtin.assert:
+        that:
+          - not inbound_tag_idempotent.changed
+        fail_msg: "Node with inbound tag lookup should be idempotent"
+
+    - name: Test error when inbound tag not found
+      remnawave.panel.rw_node:
+        api_url: "{{ api_url }}"
+        api_token: "{{ api_token }}"
+        state: present
+        name: "Nonexistent Inbound Node"
+        address: "10.0.0.203"
+        port: 443
+        config_profile:
+          active_config_profile: "E2E Test Profile"
+          active_inbound_tags:
+            - "NonexistentInbound"
+      ignore_errors: true
+      register: inbound_not_found_result
+
+    - name: Assert inbound not found error
+      ansible.builtin.assert:
+        that:
+          - inbound_not_found_result.failed
+          - "'not found' in inbound_not_found_result.msg"
+        fail_msg: "Should fail when inbound tag is not found"
+
+    - name: Cleanup inbound tag test node
+      remnawave.panel.rw_node:
+        api_url: "{{ api_url }}"
+        api_token: "{{ api_token }}"
+        state: absent
+        name: "Inbound Tag Test Node"
+
+    # ===========================================
     # Section 11: Cleanup - Delete Operations
     # ===========================================
 

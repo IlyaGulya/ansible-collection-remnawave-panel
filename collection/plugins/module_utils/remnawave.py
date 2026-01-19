@@ -244,3 +244,29 @@ def resolve_config_profile_uuid(client, profile_name):
         if profile.get("name") == profile_name:
             return profile.get("uuid")
     return None
+
+
+def resolve_inbound_uuids(client, profile_uuid, inbound_tags):
+    """
+    Resolve inbound tags to UUIDs within a config profile.
+
+    Args:
+        client: RemnawaveClient instance
+        profile_uuid: UUID of the config profile
+        inbound_tags: List of inbound tags to resolve
+
+    Returns:
+        List of resolved UUIDs
+
+    Raises:
+        ValueError if any tag is not found
+    """
+    inbounds = client.get_all(f"/api/config-profiles/{profile_uuid}/inbounds")
+    tag_to_uuid = {ib.get("tag"): ib.get("uuid") for ib in inbounds}
+
+    resolved = []
+    for tag in inbound_tags:
+        if tag not in tag_to_uuid:
+            raise ValueError(f"Inbound '{tag}' not found in config profile")
+        resolved.append(tag_to_uuid[tag])
+    return resolved
