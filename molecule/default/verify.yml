@@ -10,7 +10,7 @@
 
   tasks:
     - name: Verify node exists
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -28,7 +28,7 @@
         fail_msg: "Node verification failed - resource should exist"
 
     - name: Verify config profile exists
-      remnawave.panel.rw_config_profile:
+      remnawave.panel.config_profile:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present

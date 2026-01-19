@@ -10,7 +10,7 @@
 
   tasks:
     - name: Delete test node
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: absent
@@ -18,7 +18,7 @@
       ignore_errors: true
 
     - name: Delete test config profile
-      remnawave.panel.rw_config_profile:
+      remnawave.panel.config_profile:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: absent

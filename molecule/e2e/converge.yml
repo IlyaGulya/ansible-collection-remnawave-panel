@@ -58,7 +58,7 @@
     # ===========================================
 
     - name: Create a config profile
-      remnawave.panel.rw_config_profile:
+      remnawave.panel.config_profile:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -75,7 +75,7 @@
         fail_msg: "Config profile creation failed"
 
     - name: Create same config profile again (idempotency test)
-      remnawave.panel.rw_config_profile:
+      remnawave.panel.config_profile:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -100,7 +100,7 @@
     # ===========================================
 
     - name: Update config profile
-      remnawave.panel.rw_config_profile:
+      remnawave.panel.config_profile:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -116,7 +116,7 @@
         fail_msg: "Config profile update failed"
 
     - name: Update config profile again (idempotency test)
-      remnawave.panel.rw_config_profile:
+      remnawave.panel.config_profile:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -140,7 +140,7 @@
     # ===========================================
 
     - name: Create config profile in check mode
-      remnawave.panel.rw_config_profile:
+      remnawave.panel.config_profile:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -158,7 +158,7 @@
         fail_msg: "Check mode should report changed for new profile"
 
     - name: Verify check mode did not create profile
-      remnawave.panel.rw_config_profile:
+      remnawave.panel.config_profile:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: absent
@@ -172,7 +172,7 @@
         fail_msg: "Check mode should not have created the profile"
 
     - name: Update existing profile in check mode
-      remnawave.panel.rw_config_profile:
+      remnawave.panel.config_profile:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -191,7 +191,7 @@
         fail_msg: "Check mode should report changed for profile update"
 
     - name: Delete existing profile in check mode
-      remnawave.panel.rw_config_profile:
+      remnawave.panel.config_profile:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: absent
@@ -208,7 +208,7 @@
         fail_msg: "Check mode should report changed for profile delete"
 
     - name: Verify profile still exists after check mode delete
-      remnawave.panel.rw_config_profile:
+      remnawave.panel.config_profile:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -227,7 +227,7 @@
     # ===========================================
 
     - name: Create UUID lookup profile
-      remnawave.panel.rw_config_profile:
+      remnawave.panel.config_profile:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -243,7 +243,7 @@
         fail_msg: "UUID lookup profile creation failed"
 
     - name: Lookup config profile by UUID
-      remnawave.panel.rw_config_profile:
+      remnawave.panel.config_profile:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -263,7 +263,7 @@
     # ===========================================
 
     - name: Create a node
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -284,7 +284,7 @@
         fail_msg: "Node creation failed"
 
     - name: Create same node again (idempotency test)
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -308,7 +308,7 @@
     # ===========================================
 
     - name: Update node address
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -328,7 +328,7 @@
         fail_msg: "Node update failed"
 
     - name: Update node address again (idempotency test)
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -357,7 +357,7 @@
     # ===========================================
 
     - name: Create node with all optional parameters
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -391,7 +391,7 @@
         fail_msg: "Full params node creation failed or values mismatch"
 
     - name: Create full params node again (idempotency test)
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -417,7 +417,7 @@
         fail_msg: "Full params node should be idempotent"
 
     - name: Update traffic settings
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -449,7 +449,7 @@
     # ===========================================
 
     - name: Update node in check mode
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -471,7 +471,7 @@
         fail_msg: "Check mode should report changed for node update"
 
     - name: Delete node in check mode
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: absent
@@ -488,7 +488,7 @@
         fail_msg: "Check mode should report changed for node delete"
 
     - name: Verify node still exists after check mode delete
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -512,7 +512,7 @@
     # ===========================================
 
     - name: Lookup node by UUID
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -537,7 +537,7 @@
     # ===========================================
 
     - name: Attempt to create node with name too short
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -561,7 +561,7 @@
     # ===========================================
 
     - name: Create node using config profile NAME (not UUID)
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -582,7 +582,7 @@
         fail_msg: "Node creation with profile name lookup failed"
 
     - name: Create same node again (idempotency with name lookup)
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -602,7 +602,7 @@
         fail_msg: "Node with profile name lookup should be idempotent"
 
     - name: Test error when config profile name not found
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -623,7 +623,7 @@
         fail_msg: "Should fail when config profile name is not found"
 
     - name: Cleanup name lookup test node
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: absent
@@ -634,7 +634,7 @@
     # ===========================================
 
     - name: Create node using inbound TAG (not UUID)
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -655,7 +655,7 @@
         fail_msg: "Node creation with inbound tag lookup failed"
 
     - name: Create same node again (idempotency with inbound tag)
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -675,7 +675,7 @@
         fail_msg: "Node with inbound tag lookup should be idempotent"
 
     - name: Test error when inbound tag not found
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -697,7 +697,7 @@
         fail_msg: "Should fail when inbound tag is not found"
 
     - name: Cleanup inbound tag test node
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: absent
@@ -708,7 +708,7 @@
     # ===========================================
 
     - name: Delete full params node
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: absent
@@ -722,7 +722,7 @@
         fail_msg: "Full params node deletion should report changed"
 
     - name: Delete full params node again (idempotency test)
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: absent
@@ -736,7 +736,7 @@
         fail_msg: "Full params node deletion should be idempotent"
 
     - name: Delete test node
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: absent
@@ -750,7 +750,7 @@
         fail_msg: "Node deletion should report changed"
 
     - name: Delete node again (idempotency test)
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: absent
@@ -764,7 +764,7 @@
         fail_msg: "Node deletion should be idempotent"
 
     - name: Delete UUID lookup profile
-      remnawave.panel.rw_config_profile:
+      remnawave.panel.config_profile:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: absent
@@ -778,7 +778,7 @@
         fail_msg: "UUID lookup profile deletion should report changed"
 
     - name: Delete UUID lookup profile again (idempotency test)
-      remnawave.panel.rw_config_profile:
+      remnawave.panel.config_profile:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: absent
@@ -792,7 +792,7 @@
         fail_msg: "UUID lookup profile deletion should be idempotent"
 
     - name: Delete test config profile
-      remnawave.panel.rw_config_profile:
+      remnawave.panel.config_profile:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: absent
@@ -806,7 +806,7 @@
         fail_msg: "Config profile deletion should report changed"
 
     - name: Delete config profile again (idempotency test)
-      remnawave.panel.rw_config_profile:
+      remnawave.panel.config_profile:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: absent

@@ -14,7 +14,7 @@
     # ===========================================
 
     - name: Create a config profile
-      remnawave.panel.rw_config_profile:
+      remnawave.panel.config_profile:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -30,7 +30,7 @@
         fail_msg: "Config profile creation failed"
 
     - name: Create same config profile again (idempotency test)
-      remnawave.panel.rw_config_profile:
+      remnawave.panel.config_profile:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -49,7 +49,7 @@
     # ===========================================
 
     - name: Create a node
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -69,7 +69,7 @@
         fail_msg: "Node creation failed"
 
     - name: Create same node again (idempotency test)
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -88,7 +88,7 @@
         fail_msg: "Node should be idempotent"
 
     - name: Update node address
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present
@@ -111,7 +111,7 @@
     # ===========================================
 
     - name: Create node in check mode
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: present

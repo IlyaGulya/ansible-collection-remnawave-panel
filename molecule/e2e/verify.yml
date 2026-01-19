@@ -14,7 +14,7 @@
     # ===========================================
 
     - name: Verify E2E Test Node was cleaned up
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: absent
@@ -28,7 +28,7 @@
         fail_msg: "E2E Test Node should have been cleaned up"
 
     - name: Verify Full Params Node was cleaned up
-      remnawave.panel.rw_node:
+      remnawave.panel.node:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: absent
@@ -46,7 +46,7 @@
     # ===========================================
 
     - name: Verify E2E Test Profile was cleaned up
-      remnawave.panel.rw_config_profile:
+      remnawave.panel.config_profile:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: absent
@@ -60,7 +60,7 @@
         fail_msg: "E2E Test Profile should have been cleaned up"
 
     - name: Verify UUID Lookup Profile was cleaned up
-      remnawave.panel.rw_config_profile:
+      remnawave.panel.config_profile:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: absent
@@ -74,7 +74,7 @@
         fail_msg: "UUID Lookup Profile should have been cleaned up"
 
     - name: Verify Check Mode Profile was not created
-      remnawave.panel.rw_config_profile:
+      remnawave.panel.config_profile:
         api_url: "{{ api_url }}"
         api_token: "{{ api_token }}"
         state: absent
