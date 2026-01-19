@@ -10,9 +10,6 @@
   vars_files:
     - ../vars/example_vars.yml
 
-  collections:
-    - remnawave.panel
-
   tasks:
     - name: Create {{ resource_name | lower }}
       remnawave.panel.{{ module_name }}:

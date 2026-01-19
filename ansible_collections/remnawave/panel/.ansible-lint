@@ -1,0 +1,6 @@
+# Ansible-lint configuration
+---
+# Skip sanity rule as it has false positives for pylint:repeated-keyword
+# which is a valid ansible-test ignore
+skip_list:
+  - sanity[cannot-ignore]

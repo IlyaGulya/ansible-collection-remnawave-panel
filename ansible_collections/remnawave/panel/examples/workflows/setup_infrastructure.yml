@@ -11,9 +11,6 @@
   vars_files:
     - ../vars/example_vars.yml
 
-  collections:
-    - remnawave.panel
-
   tasks:
     # =========================================
     # Step 1: Create Config Profile
@@ -30,8 +27,7 @@
 
     - name: Display config profile result
       ansible.builtin.debug:
-        msg: "Created profile '{{ profile_result.response.name }}' with UUID {{ profile_result.response.uuid }}"
-      when: profile_result.changed
+        msg: "Profile '{{ profile_result.response.name }}' (UUID: {{ profile_result.response.uuid }})"
 
     # Extract inbound UUID for node configuration
     - name: Set profile and inbound facts
@@ -59,8 +55,7 @@
 
     - name: Display node result
       ansible.builtin.debug:
-        msg: "Created node '{{ node_result.response.name }}' at {{ node_result.response.address }}"
-      when: node_result.changed
+        msg: "Node '{{ node_result.response.name }}' at {{ node_result.response.address }}"
 
     # =========================================
     # Summary

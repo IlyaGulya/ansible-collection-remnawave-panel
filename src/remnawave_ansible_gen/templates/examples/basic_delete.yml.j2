@@ -10,9 +10,6 @@
   vars_files:
     - ../vars/example_vars.yml
 
-  collections:
-    - remnawave.panel
-
   tasks:
     - name: Delete {{ resource_name | lower }} by {{ lookup_field }}
       remnawave.panel.{{ module_name }}:

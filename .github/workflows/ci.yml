@@ -15,12 +15,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v7
         with:
-          version: "latest"
-
-      - name: Set up Python
-        run: uv python install 3.11
+          python-version: "3.11"
+          enable-cache: true
 
       - name: Install dependencies
         run: uv sync
@@ -43,12 +41,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v7
         with:
-          version: "latest"
-
-      - name: Set up Python
-        run: uv python install 3.11
+          python-version: "3.11"
+          enable-cache: true
 
       - name: Install dependencies (with dev)
         run: uv sync --all-extras
@@ -81,12 +77,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v7
         with:
-          version: "latest"
-
-      - name: Set up Python
-        run: uv python install 3.11
+          python-version: "3.11"
+          enable-cache: true
 
       - name: Install dependencies (with dev)
         run: uv sync --all-extras
@@ -129,20 +123,17 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v7
         with:
-          version: "latest"
-
-      - name: Set up Python
-        run: uv python install 3.11
+          python-version: "3.11"
+          enable-cache: true
 
       - name: Install dependencies
         run: uv sync --all-extras
 
       - name: Run ansible-lint
-        run: |
-          uv pip install ansible-lint
-          cd ansible_collections/remnawave/panel && uv run ansible-lint
+        working-directory: ansible_collections/remnawave/panel
+        run: uv run ansible-lint
         continue-on-error: true
 
   sanity:
@@ -152,17 +143,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
         with:
           python-version: "3.11"
+          enable-cache: true
 
-      - name: Install ansible-core
-        run: pip install ansible-core
+      - name: Install dependencies
+        run: uv sync
 
       - name: Run sanity tests
         working-directory: ansible_collections/remnawave/panel
-        run: ansible-test sanity --docker default
+        run: uv run ansible-test sanity --docker default
 
   unit-tests:
     name: Unit Tests
@@ -171,14 +163,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
         with:
           python-version: "3.11"
+          enable-cache: true
 
-      - name: Install ansible-core
-        run: pip install ansible-core
+      - name: Install dependencies
+        run: uv sync
 
       - name: Run unit tests
         working-directory: ansible_collections/remnawave/panel
-        run: ansible-test units --docker default -v
+        run: uv run ansible-test units --docker default -v

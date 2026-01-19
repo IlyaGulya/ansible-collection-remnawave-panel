@@ -10,9 +10,6 @@
   vars_files:
     - ../vars/example_vars.yml
 
-  collections:
-    - remnawave.panel
-
   tasks:
     - name: Delete config profile by name
       remnawave.panel.config_profile:

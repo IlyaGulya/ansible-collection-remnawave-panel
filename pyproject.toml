@@ -24,6 +24,7 @@ packages = ["src/remnawave_ansible_gen"]
 [dependency-groups]
 dev = [
     "ansible>=2.14.0",
+    "ansible-lint>=24.0.0",
     "molecule>=6.0.0",
     "molecule-docker>=2.1.0",
     "mypy>=1.13.0",

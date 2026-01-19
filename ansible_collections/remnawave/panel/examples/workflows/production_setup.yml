@@ -12,9 +12,6 @@
   vars_files:
     - ../vars/production_vars.yml
 
-  collections:
-    - remnawave.panel
-
   tasks:
     # =========================================
     # Step 1: Create All Config Profiles
@@ -46,7 +43,13 @@
 
     - name: Build profile lookup dictionary
       ansible.builtin.set_fact:
-        profile_lookup: "{{ profile_lookup | default({}) | combine({item.item.name: {'uuid': item.response.uuid, 'inbound_uuid': item.response.inbounds[0].uuid}}) }}"
+        profile_lookup: >-
+          {{ profile_lookup | default({}) | combine({
+            item.item.name: {
+              'uuid': item.response.uuid,
+              'inbound_uuid': item.response.inbounds[0].uuid
+            }
+          }) }}
       loop: "{{ profiles_result.results }}"
       loop_control:
         label: "{{ item.item.name }}"

@@ -10,9 +10,6 @@
   vars_files:
     - ../vars/example_vars.yml
 
-  collections:
-    - remnawave.panel
-
   tasks:
     - name: Update config profile
       remnawave.panel.config_profile:

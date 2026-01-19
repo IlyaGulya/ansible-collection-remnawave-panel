@@ -11,9 +11,6 @@
   vars_files:
     - ../vars/example_vars.yml
 
-  collections:
-    - remnawave.panel
-
   tasks:
     # =========================================
     # Step 1: Delete Nodes
@@ -30,8 +27,7 @@
 
     - name: Display node deletion result
       ansible.builtin.debug:
-        msg: "Deleted node '{{ '{{' }} node_name {{ '}}' }}'"
-      when: node_result.changed
+        msg: "Node '{{ '{{' }} node_name {{ '}}' }}' deletion: {{ '{{' }} 'deleted' if node_result.changed else 'already absent' {{ '}}' }}"
 
     # =========================================
     # Step 2: Delete Config Profile
@@ -47,8 +43,7 @@
 
     - name: Display profile deletion result
       ansible.builtin.debug:
-        msg: "Deleted config profile '{{ '{{' }} config_profile_name {{ '}}' }}'"
-      when: profile_result.changed
+        msg: "Profile '{{ '{{' }} config_profile_name {{ '}}' }}' deletion: {{ '{{' }} 'deleted' if profile_result.changed else 'already absent' {{ '}}' }}"
 
     # =========================================
     # Summary

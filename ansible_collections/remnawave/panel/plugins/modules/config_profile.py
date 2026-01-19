@@ -134,6 +134,7 @@ msg:
 """
 
 from ansible.module_utils.basic import AnsibleModule
+
 from ansible_collections.remnawave.panel.plugins.module_utils.remnawave import (
     RemnawaveClient,
     camel_to_snake_dict,

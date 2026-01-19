@@ -1,6 +1,6 @@
 namespace: remnawave
 name: panel
-version: 2.5.3
+version: 0.1.0
 readme: README.md
 authors:
   - Ilya Gulya
