@@ -3,7 +3,8 @@ general:
   output_dir: "collection/plugins/modules"
   module_utils_dir: "collection/plugins/module_utils"
 
-# Read-only fields that should be excluded from comparison during idempotency checks
+# Global read-only fields excluded from comparison during idempotency checks
+# These are merged with auto-discovered and per-module fields
 read_only_fields:
   - uuid
   - createdAt
@@ -27,55 +28,31 @@ read_only_fields:
   # activeInbounds is not returned by the API in node responses
   - activeInbounds
 
-modules:
-  - name: rw_node
-    resource_name: Node
-    description: Manage Remnawave panel nodes
-    controller_tag: "Nodes Controller"
-    id_param: uuid
-    lookup_field: name
-    endpoints:
-      create:
-        path: /api/nodes
-        method: POST
-        dto: CreateNodeRequestDto
-      update:
-        path: /api/nodes
-        method: PATCH
-        dto: UpdateNodeRequestDto
-      get_all:
-        path: /api/nodes
-        method: GET
-        response_dto: GetAllNodesResponseDto
-      get_one:
-        path: /api/nodes/{uuid}
-        method: GET
-      delete:
-        path: /api/nodes/{uuid}
-        method: DELETE
+# Which controllers to generate modules for
+discovery:
+  include_controllers:
+    - "Nodes Controller"
+    - "Config Profiles Controller"
 
-  - name: rw_config_profile
-    resource_name: Config Profile
+  exclude_controllers:
+    - "Auth Controller"
+    - "System Controller"
+    - "Keygen Controller"
+    - "Bandwidth Stats Controller"
+
+# Per-module overrides (only when auto-detection is wrong)
+module_overrides:
+  node:
+    read_only_fields:
+      # Additional response-only fields
+      - nodeVersion
+      - xrayUptime
+      - trafficUsedBytes
+
+  config_profile:
     description: Manage Remnawave panel configuration profiles
-    controller_tag: "Config Profiles Controller"
-    id_param: uuid
-    lookup_field: name
-    endpoints:
-      create:
-        path: /api/config-profiles
-        method: POST
-        dto: CreateConfigProfileRequestDto
-      update:
-        path: /api/config-profiles
-        method: PATCH
-        dto: UpdateConfigProfileRequestDto
-      get_all:
-        path: /api/config-profiles
-        method: GET
-        response_dto: GetConfigProfilesResponseDto
-      get_one:
-        path: /api/config-profiles/{uuid}
-        method: GET
-      delete:
-        path: /api/config-profiles/{uuid}
-        method: DELETE
+    read_only_fields:
+      - viewPosition
+      - nodesCount
+      - inbounds
+      - nodes

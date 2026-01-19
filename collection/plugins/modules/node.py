@@ -12,7 +12,7 @@ __metaclass__ = type
 
 DOCUMENTATION = r"""
 ---
-module: rw_node
+module: node
 short_description: Manage Remnawave panel nodes
 version_added: "1.0.0"
 description:
@@ -131,7 +131,7 @@ notes:
 
 EXAMPLES = r"""
 - name: Create a new node
-  remnawave.panel.rw_node:
+  remnawave.panel.node:
     api_url: "https://panel.example.com"
     api_token: "{{ api_token }}"
     state: present
@@ -140,7 +140,7 @@ EXAMPLES = r"""
     config_profile: "example_value"
 
 - name: Update an existing node
-  remnawave.panel.rw_node:
+  remnawave.panel.node:
     api_url: "https://panel.example.com"
     api_token: "{{ api_token }}"
     state: present
@@ -150,14 +150,14 @@ EXAMPLES = r"""
     config_profile: "updated_value"
 
 - name: Delete a node
-  remnawave.panel.rw_node:
+  remnawave.panel.node:
     api_url: "https://panel.example.com"
     api_token: "{{ api_token }}"
     state: absent
     uuid: "uuid-to-delete"
 
 - name: Delete a node by name
-  remnawave.panel.rw_node:
+  remnawave.panel.node:
     api_url: "https://panel.example.com"
     api_token: "{{ api_token }}"
     state: absent

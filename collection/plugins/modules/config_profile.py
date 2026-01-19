@@ -12,7 +12,7 @@ __metaclass__ = type
 
 DOCUMENTATION = r"""
 ---
-module: rw_config_profile
+module: config_profile
 short_description: Manage Remnawave panel configuration profiles
 version_added: "1.0.0"
 description:
@@ -68,7 +68,7 @@ notes:
 
 EXAMPLES = r"""
 - name: Create a new config profile
-  remnawave.panel.rw_config_profile:
+  remnawave.panel.config_profile:
     api_url: "https://panel.example.com"
     api_token: "{{ api_token }}"
     state: present
@@ -76,7 +76,7 @@ EXAMPLES = r"""
     config: "example_value"
 
 - name: Update an existing config profile
-  remnawave.panel.rw_config_profile:
+  remnawave.panel.config_profile:
     api_url: "https://panel.example.com"
     api_token: "{{ api_token }}"
     state: present
@@ -85,14 +85,14 @@ EXAMPLES = r"""
     config: "updated_value"
 
 - name: Delete a config profile
-  remnawave.panel.rw_config_profile:
+  remnawave.panel.config_profile:
     api_url: "https://panel.example.com"
     api_token: "{{ api_token }}"
     state: absent
     uuid: "uuid-to-delete"
 
 - name: Delete a config profile by name
-  remnawave.panel.rw_config_profile:
+  remnawave.panel.config_profile:
     api_url: "https://panel.example.com"
     api_token: "{{ api_token }}"
     state: absent
