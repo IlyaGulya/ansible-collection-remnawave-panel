@@ -26,6 +26,8 @@ dev = [
     "ansible>=2.14.0",
     "molecule>=6.0.0",
     "molecule-docker>=2.1.0",
+    "mypy>=1.13.0",
+    "types-PyYAML>=6.0.12",
 ]
 
 [tool.ruff]
@@ -42,3 +44,25 @@ ignore = ["E501"]
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+strict_equality = true
+extra_checks = true
+check_untyped_defs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+files = ["src/remnawave_ansible_gen"]
+
+[[tool.mypy.overrides]]
+module = [
+    "prance",
+    "prance.*",
+    "openapi_spec_validator",
+    "openapi_spec_validator.*",
+]
+ignore_missing_imports = true

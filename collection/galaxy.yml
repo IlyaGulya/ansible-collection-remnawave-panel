@@ -3,7 +3,7 @@ name: panel
 version: 2.5.3
 readme: README.md
 authors:
-  - Remnawave Contributors
+  - Ilya Gulya
 description: Ansible collection for managing Remnawave panel resources
 license:
   - MIT

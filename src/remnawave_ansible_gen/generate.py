@@ -11,7 +11,7 @@ import subprocess
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import yaml
 from jinja2 import Environment, FileSystemLoader
@@ -127,7 +127,7 @@ def extract_fields_from_schema(
 def load_config(config_path: Path) -> dict[str, Any]:
     """Load the generator configuration file."""
     with open(config_path) as f:
-        return yaml.safe_load(f)
+        return cast(dict[str, Any], yaml.safe_load(f))
 
 
 def load_openapi_spec(spec_path: Path) -> dict[str, Any]:
@@ -135,17 +135,17 @@ def load_openapi_spec(spec_path: Path) -> dict[str, Any]:
     # Use flex backend which is more lenient with validation
     try:
         parser = ResolvingParser(str(spec_path), backend="flex")
-        return parser.specification
+        return cast(dict[str, Any], parser.specification)
     except Exception:
         # Fall back to plain YAML loading if flex fails
         with open(spec_path) as f:
-            return yaml.safe_load(f)
+            return cast(dict[str, Any], yaml.safe_load(f))
 
 
 def get_schema_by_name(spec: dict[str, Any], schema_name: str) -> dict[str, Any] | None:
     """Get a schema by name from the OpenAPI spec."""
-    schemas = spec.get("components", {}).get("schemas", {})
-    return schemas.get(schema_name)
+    schemas: dict[str, Any] = spec.get("components", {}).get("schemas", {})
+    return cast(dict[str, Any] | None, schemas.get(schema_name))
 
 
 # =============================================================================
@@ -246,7 +246,7 @@ def detect_lookup_field(create_schema: dict[str, Any]) -> str | None:
     The lookup field is typically the first required string field
     with constraints (minLength, maxLength, pattern).
     """
-    properties = create_schema.get("properties", {})
+    properties: dict[str, Any] = create_schema.get("properties", {})
     required_fields = set(create_schema.get("required", []))
 
     # Prioritize 'name' if it exists and is required
@@ -668,7 +668,7 @@ def render_basic_examples(
 
         # Get fields for this resource
         create_dto_name = resource.endpoints["create"].dto
-        create_schema = get_schema_by_name(spec, create_dto_name)
+        create_schema = get_schema_by_name(spec, create_dto_name) if create_dto_name else None
         fields = []
         if create_schema:
             fields = extract_fields_from_schema(create_schema, global_read_only)

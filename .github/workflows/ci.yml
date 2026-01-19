@@ -28,6 +28,9 @@ jobs:
       - name: Lint generator code
         run: uv run ruff check src/
 
+      - name: Type check generator code
+        run: uv run mypy src/
+
       - name: Check freshness
         run: bash scripts/check-freshness.sh
 
@@ -151,3 +154,27 @@ jobs:
           uv pip install ansible-lint
           cd collection && uv run ansible-lint
         continue-on-error: true
+
+  sanity:
+    name: Ansible Sanity Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install ansible-core
+        run: pip install ansible-core
+
+      - name: Set up collection path
+        run: |
+          mkdir -p ~/.ansible/collections/ansible_collections/remnawave
+          ln -s ${{ github.workspace }}/collection ~/.ansible/collections/ansible_collections/remnawave/panel
+
+      - name: Run sanity tests
+        working-directory: ~/.ansible/collections/ansible_collections/remnawave/panel
+        run: ansible-test sanity --docker default

@@ -21,6 +21,9 @@ uv run generate --dry-run
 # Run linter on generator code
 uv run ruff check src/
 
+# Run type checker on generator code
+uv run mypy src/
+
 # Check if generated code is in sync with spec
 bash scripts/check-freshness.sh
 
@@ -39,6 +42,11 @@ bash scripts/e2e-setup.sh            # Start containers, get API token
 uv run molecule converge -s e2e      # Run converge only (no setup/teardown)
 uv run molecule verify -s e2e        # Run verify only
 bash scripts/e2e-teardown.sh         # Cleanup when done
+
+# Run Ansible sanity tests on collection
+mkdir -p /tmp/ansible_collections/remnawave
+cp -r collection /tmp/ansible_collections/remnawave/panel
+cd /tmp/ansible_collections/remnawave/panel && ansible-test sanity --docker default
 ```
 
 ## Architecture
@@ -99,12 +107,24 @@ These behaviors were discovered during implementation and are important for modu
 If you need to understand Remnawave internals (API behavior, error codes, authentication flow), clone repositories into `.claudetmp/`:
 
 ```bash
-git clone https://github.com/remnawave/backend.git .claudetmp/backend
-git clone https://github.com/remnawave/node.git .claudetmp/node
-git clone https://github.com/remnawave/panel.git .claudetmp/panel
+git clone --depth 1 https://github.com/remnawave/backend.git .claudetmp/backend
+git clone --depth 1 https://github.com/remnawave/node.git .claudetmp/node
+git clone --depth 1 https://github.com/remnawave/panel.git .claudetmp/panel
 ```
 
 Useful locations in backend:
 - `libs/contract/constants/errors/errors.ts` - Error codes (A032, A112, etc.)
 - `libs/contract/commands/` - Zod request/response schemas
 - `src/common/helpers/xray-config/` - Config validation logic
+
+## Ansible Collections Development documentation
+
+If you need to understand how to develop ansible collections, clone repository into `.claudetmp/`:
+
+```bash
+git clone --depth 1 git@github.com:ansible/ansible-documentation.git .claudetmp/ansible-documentation
+```
+
+Development ducumentation is located in:
+
+- `ansible-documentation/tree/devel/docs/docsite/rst/dev_guide/`
