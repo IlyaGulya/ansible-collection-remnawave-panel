@@ -3,6 +3,11 @@ general:
   output_dir: "collection/plugins/modules"
   module_utils_dir: "collection/plugins/module_utils"
 
+# Example playbook generation settings
+examples:
+  output_dir: "collection/examples"
+  enabled: true
+
 # Global read-only fields excluded from comparison during idempotency checks
 # These are merged with auto-discovered and per-module fields
 read_only_fields:

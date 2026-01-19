@@ -1,0 +1,10 @@
+name: "{{ node_name }}"
+address: "{{ node_address }}"
+port: "{{ node_port }}"
+is_traffic_tracking_active: "{{ traffic_tracking.is_active }}"
+traffic_limit_bytes: "{{ traffic_tracking.limit_bytes }}"
+notify_percent: "{{ traffic_tracking.notify_percent }}"
+config_profile:
+  active_config_profile: "{{ config_profile_name }}"
+  active_inbound_tags:
+    - "MainInbound"
