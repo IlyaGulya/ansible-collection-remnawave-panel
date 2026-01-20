@@ -14,26 +14,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
+      - name: Install pixi
+        uses: prefix-dev/setup-pixi@v0.9.3
         with:
-          python-version: "3.11"
-          enable-cache: true
-
-      - name: Install dependencies
-        run: uv sync
+          cache: true
+          environments: dev
 
       - name: Lint generator code
-        run: uvx ruff check src/
+        run: pixi run lint
 
       - name: Type check generator code
-        run: uvx mypy src/
+        run: pixi run typecheck
 
       - name: Check version sync
-        run: uv run version check
+        run: pixi run version-check
 
       - name: Check freshness
-        run: bash scripts/check-freshness.sh
+        run: pixi run check-freshness
 
   lint-collection:
     name: Lint Ansible Collection
@@ -42,18 +39,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
+      - name: Install pixi
+        uses: prefix-dev/setup-pixi@v0.9.3
         with:
-          python-version: "3.11"
-          enable-cache: true
-
-      - name: Install dependencies
-        run: uv sync --all-extras
+          cache: true
+          environments: dev
 
       - name: Run ansible-lint
-        working-directory: ansible_collections/remnawave/panel
-        run: uv run ansible-lint
+        run: pixi run ansible-lint
         continue-on-error: true
 
   generate-matrix:
@@ -66,24 +59,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Install pixi
+        uses: prefix-dev/setup-pixi@v0.9.3
         with:
-          python-version: "3.11"
-
-      - name: Install tox-ansible
-        run: pip install tox-ansible
+          cache: true
+          environments: dev
 
       - name: Generate test matrices
         id: generate
-        working-directory: ansible_collections/remnawave/panel
         run: |
-          # Generate sanity matrix
-          SANITY_MATRIX=$(tox --ansible --gh-matrix --matrix-scope sanity --conf tox-ansible.ini 2>/dev/null || echo '{"include":[]}')
+          SANITY_MATRIX=$(pixi run tox-matrix-sanity 2>/dev/null || echo '{"include":[]}')
           echo "sanity_matrix=$SANITY_MATRIX" >> $GITHUB_OUTPUT
 
-          # Generate unit matrix
-          UNIT_MATRIX=$(tox --ansible --gh-matrix --matrix-scope unit --conf tox-ansible.ini 2>/dev/null || echo '{"include":[]}')
+          UNIT_MATRIX=$(pixi run tox-matrix-unit 2>/dev/null || echo '{"include":[]}')
           echo "unit_matrix=$UNIT_MATRIX" >> $GITHUB_OUTPUT
 
   sanity:
@@ -97,17 +85,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Install pixi
+        uses: prefix-dev/setup-pixi@v0.9.3
         with:
-          python-version: ${{ matrix.python }}
-
-      - name: Install tox-ansible
-        run: pip install tox-ansible
+          cache: true
+          environments: dev
 
       - name: Run sanity tests
-        working-directory: ansible_collections/remnawave/panel
-        run: tox --ansible -e ${{ matrix.name }} --conf tox-ansible.ini
+        run: pixi run tox-sanity ${{ matrix.name }}
 
   unit:
     name: Unit (${{ matrix.name }})
@@ -120,17 +105,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Install pixi
+        uses: prefix-dev/setup-pixi@v0.9.3
         with:
-          python-version: ${{ matrix.python }}
-
-      - name: Install tox-ansible
-        run: pip install tox-ansible
+          cache: true
+          environments: dev
 
       - name: Run unit tests
-        working-directory: ansible_collections/remnawave/panel
-        run: tox --ansible -e ${{ matrix.name }} --conf tox-ansible.ini
+        run: pixi run tox-unit ${{ matrix.name }}
 
   e2e:
     name: E2E Tests
@@ -141,21 +123,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
+      - name: Install pixi
+        uses: prefix-dev/setup-pixi@v0.9.3
         with:
-          python-version: "3.11"
-          enable-cache: true
-
-      - name: Install dependencies
-        run: uv sync --all-extras
+          cache: true
+          environments: dev
 
       - name: Install community.docker collection
-        run: uv run ansible-galaxy collection install community.docker
+        run: pixi run ansible-galaxy collection install community.docker
 
       - name: Run E2E tests
-        working-directory: ansible_collections/remnawave/panel
-        run: uv run molecule test -s e2e
+        run: pixi run molecule-test
 
       - name: Collect container logs on failure
         if: failure()

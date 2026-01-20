@@ -12,22 +12,22 @@ This is a code generator that produces Ansible modules from the Remnawave Panel 
 
 ```bash
 # Install dependencies
-uv sync --all-extras
+pixi install -e dev
 
 # Run the code generator (regenerates modules from OpenAPI spec)
-uv run generate
+pixi run generate
 
 # Preview what modules would be generated without writing files
-uv run generate --dry-run
+pixi run generate-dry-run
 
 # Run linter on generator code
-uvx ruff check src/
+pixi run lint
 
 # Run type checker on generator code
-uvx mypy src/
+pixi run typecheck
 
 # Check if generated code is in sync with spec
-bash scripts/check-freshness.sh
+pixi run check-freshness
 ```
 
 ### Testing with tox-ansible
@@ -35,16 +35,18 @@ bash scripts/check-freshness.sh
 Used for sanity and unit tests with automatic Python/Ansible version matrix:
 
 ```bash
-cd ansible_collections/remnawave/panel
-
 # List available test environments
-tox list --ansible --conf tox-ansible.ini
+pixi run tox-list
 
-# Run sanity tests
-tox --ansible -e sanity-py3.11-2.18 --conf tox-ansible.ini
+# Run sanity tests for a specific environment
+pixi run tox-sanity sanity-py3.11-2.18
 
-# Run unit tests
-tox --ansible -e unit-py3.11-2.18 --conf tox-ansible.ini
+# Run unit tests for a specific environment
+pixi run tox-unit unit-py3.11-2.18
+
+# Generate GitHub Actions matrix (for CI)
+pixi run tox-matrix-sanity
+pixi run tox-matrix-unit
 ```
 
 ### E2E Tests with Molecule
@@ -52,16 +54,14 @@ tox --ansible -e unit-py3.11-2.18 --conf tox-ansible.ini
 E2E tests run directly via molecule (not through tox-ansible due to pytest-ansible path limitations):
 
 ```bash
-cd ansible_collections/remnawave/panel
-
 # Run full E2E test sequence
-uv run molecule test -s e2e
+pixi run molecule-test
 
 # Run individual stages for debugging
-uv run molecule create -s e2e    # Start containers
-uv run molecule converge -s e2e  # Run tests
-uv run molecule verify -s e2e    # Verify cleanup
-uv run molecule destroy -s e2e   # Teardown
+pixi run molecule-create    # Start containers
+pixi run molecule-converge  # Run tests
+pixi run molecule-verify    # Verify cleanup
+pixi run molecule-destroy   # Teardown
 ```
 
 ## Architecture
