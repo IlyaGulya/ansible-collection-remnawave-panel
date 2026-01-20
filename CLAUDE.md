@@ -27,11 +27,6 @@ uv run mypy src/
 # Check if generated code is in sync with spec
 bash scripts/check-freshness.sh
 
-# Run Molecule tests (mock API using Prism)
-npm install -g @stoplight/prism-cli   # one-time setup
-prism mock api-spec/api-1.yaml -p 4010 &
-uv run molecule test
-
 # Run E2E tests (real Remnawave backend in Docker)
 # Molecule handles setup/teardown automatically
 uv run molecule test -s e2e
@@ -85,7 +80,6 @@ ansible_collections/remnawave/panel/plugins/module_utils/remnawave.py (generated
 
 ### Testing Infrastructure
 
-- **`molecule/default/`**: Mock tests using Prism OpenAPI mock server on port 4010
 - **`molecule/e2e/`**: E2E tests against real Remnawave backend in Docker
   - Uses Caddy reverse proxy to inject required `X-Forwarded-Proto: https` header
   - PostgreSQL + Valkey + Backend containers via docker-compose
@@ -124,9 +118,28 @@ Useful locations in backend:
 If you need to understand how to develop ansible collections, clone repository into `.claudetmp/`:
 
 ```bash
-git clone --depth 1 git@github.com:ansible/ansible-documentation.git .claudetmp/ansible-documentation
+git clone --depth 1 https://github.com/ansible/ansible-documentation.git .claudetmp/ansible-documentation
 ```
 
-Development ducumentation is located in:
+Development documentation is located in:
 
-- `ansible-documentation/tree/devel/docs/docsite/rst/dev_guide/`
+- `.claudetmp/ansible-documentation/docs/docsite/rst/dev_guide/`
+
+## Molecule Testing Framework
+
+If you need to understand how Molecule works for testing Ansible collections:
+
+```bash
+git clone --depth 1 https://github.com/ansible/molecule.git .claudetmp/molecule
+```
+
+Useful locations:
+- `.claudetmp/molecule/docs/` - Documentation (markdown files)
+- `.claudetmp/molecule/src/molecule/` - Source code
+- `.claudetmp/molecule/src/molecule/provisioner/` - Provisioner implementation (handles env vars, ansible config)
+
+### Molecule Configuration Notes
+
+- **ansible-native config**: Use `ansible:` section with `env:` for environment variables (modern approach)
+- **ANSIBLE_COLLECTIONS_PATH**: Must be relative to scenario directory (e.g., `../..` from `molecule/e2e/` to reach project root)
+- **cwd for ansible-playbook**: Molecule runs ansible-playbook from `self._config.scenario_path` (e.g., `molecule/e2e/`), so paths must be relative to that

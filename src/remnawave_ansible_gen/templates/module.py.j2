@@ -35,6 +35,17 @@ options:
             - Can be set via the C(REMNAWAVE_API_TOKEN) environment variable.
         type: str
         required: true
+    validate_certs:
+        description:
+            - Whether to validate SSL/TLS certificates.
+            - Set to C(false) for self-signed certificates.
+        type: bool
+        default: true
+    timeout:
+        description:
+            - Timeout in seconds for API requests.
+        type: int
+        default: 30
     state:
         description:
             - The desired state of the resource.
@@ -142,12 +153,29 @@ msg:
     description: A message describing the result of the operation.
     type: str
     returned: always
+status_code:
+    description: HTTP status code from the API (only on error).
+    type: int
+    returned: on API error
+response_body:
+    description: Response body from the API (only on error).
+    type: raw
+    returned: on API error
+request_url:
+    description: The URL that was requested (only on error).
+    type: str
+    returned: on API error
+request_method:
+    description: The HTTP method used (only on error).
+    type: str
+    returned: on API error
 """
 
-from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils.basic import AnsibleModule, env_fallback
 
 from ansible_collections.remnawave.panel.plugins.module_utils.remnawave import (
     RemnawaveClient,
+    RemnawaveAPIError,
     recursive_diff,
     snake_to_camel_dict,
     camel_to_snake_dict,
@@ -179,8 +207,10 @@ def run_module():
     """Main module execution."""
     # Define argument spec
     module_args = dict(
-        api_url=dict(type="str", required=True, fallback=(lambda: None, [])),
-        api_token=dict(type="str", required=True, no_log=True, fallback=(lambda: None, [])),
+        api_url=dict(type="str", required=True, fallback=(env_fallback, ["REMNAWAVE_API_URL"])),
+        api_token=dict(type="str", required=True, no_log=True, fallback=(env_fallback, ["REMNAWAVE_API_TOKEN"])),
+        validate_certs=dict(type="bool", default=True),
+        timeout=dict(type="int", default=30),
         state=dict(type="str", default="present", choices=["present", "absent"]),
         {{ id_param }}=dict(type="str", required=False),
 {% for field in fields %}
@@ -224,7 +254,8 @@ def run_module():
     client = RemnawaveClient(
         api_url=module.params["api_url"],
         api_token=module.params["api_token"],
-        module=module,
+        validate_certs=module.params["validate_certs"],
+        timeout=module.params["timeout"],
     )
 
 {% if resolve_uuid_by_name %}
@@ -338,8 +369,15 @@ def run_module():
 
         module.exit_json(**result)
 
+    except RemnawaveAPIError as e:
+        result["status_code"] = e.status_code
+        result["response_body"] = e.response_body
+        result["request_url"] = e.url
+        result["request_method"] = e.method
+        result.pop("msg", None)
+        module.fail_json(msg=str(e), **result)
     except Exception as e:
-        result.pop("msg", None)  # Remove msg to avoid duplicate keyword argument
+        result.pop("msg", None)
         module.fail_json(msg=str(e), **result)
 
 

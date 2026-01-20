@@ -9,7 +9,7 @@ platforms:
 provisioner:
   name: ansible
   env:
-    ANSIBLE_COLLECTIONS_PATH: "~/.ansible/collections"
+    ANSIBLE_COLLECTIONS_PATH: "../.."
   inventory:
     host_vars:
       localhost:

@@ -1,8 +1,0 @@
----
-- name: Create
-  hosts: localhost
-  gather_facts: false
-  tasks:
-    - name: Molecule create step (no-op for localhost)
-      ansible.builtin.debug:
-        msg: "Using localhost, no creation needed"

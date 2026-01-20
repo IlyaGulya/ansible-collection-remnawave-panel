@@ -13,6 +13,7 @@ import pytest
 
 from ansible_collections.remnawave.panel.plugins.module_utils.remnawave import (
     READ_ONLY_FIELDS,
+    RemnawaveAPIError,
     RemnawaveClient,
     _lists_equal,
     camel_to_snake_dict,
@@ -515,6 +516,63 @@ class TestRecursiveDiff:
 
 
 # =============================================================================
+# Tests for RemnawaveAPIError
+# =============================================================================
+
+
+class TestRemnawaveAPIError:
+    """Test cases for RemnawaveAPIError exception class."""
+
+    def test_message(self):
+        """RemnawaveAPIError should store and return message."""
+        error = RemnawaveAPIError("Test error message")
+        assert str(error) == "Test error message"
+
+    def test_status_code(self):
+        """RemnawaveAPIError should store status code."""
+        error = RemnawaveAPIError("Error", status_code=404)
+        assert error.status_code == 404
+
+    def test_response_body(self):
+        """RemnawaveAPIError should store response body."""
+        error = RemnawaveAPIError("Error", response_body={"error": "not found"})
+        assert error.response_body == {"error": "not found"}
+
+    def test_url(self):
+        """RemnawaveAPIError should store URL."""
+        error = RemnawaveAPIError("Error", url="https://api.example.com/test")
+        assert error.url == "https://api.example.com/test"
+
+    def test_method(self):
+        """RemnawaveAPIError should store HTTP method."""
+        error = RemnawaveAPIError("Error", method="GET")
+        assert error.method == "GET"
+
+    def test_all_attributes(self):
+        """RemnawaveAPIError should store all attributes."""
+        error = RemnawaveAPIError(
+            "API failed",
+            status_code=500,
+            response_body="Internal error",
+            url="https://api.example.com",
+            method="POST",
+        )
+        assert str(error) == "API failed"
+        assert error.status_code == 500
+        assert error.response_body == "Internal error"
+        assert error.url == "https://api.example.com"
+        assert error.method == "POST"
+
+    def test_defaults_to_none(self):
+        """RemnawaveAPIError should default optional attributes to None."""
+        error = RemnawaveAPIError("Error only")
+        assert error.status_code is None
+        assert error.response_body is None
+        assert error.url is None
+        assert error.method is None
+
+
+# =============================================================================
 # Tests for RemnawaveClient
 # =============================================================================
 
@@ -536,6 +594,26 @@ class TestRemnawaveClient:
         """Client should store API token."""
         client = RemnawaveClient("https://api.example.com", "my-secret-token")
         assert client.api_token == "my-secret-token"
+
+    def test_init_default_validate_certs(self):
+        """Client should default validate_certs to True."""
+        client = RemnawaveClient("https://api.example.com", "token")
+        assert client.validate_certs is True
+
+    def test_init_default_timeout(self):
+        """Client should default timeout to 30."""
+        client = RemnawaveClient("https://api.example.com", "token")
+        assert client.timeout == 30
+
+    def test_init_custom_validate_certs(self):
+        """Client should accept custom validate_certs."""
+        client = RemnawaveClient("https://api.example.com", "token", validate_certs=False)
+        assert client.validate_certs is False
+
+    def test_init_custom_timeout(self):
+        """Client should accept custom timeout."""
+        client = RemnawaveClient("https://api.example.com", "token", timeout=60)
+        assert client.timeout == 60
 
 
 class TestRemnawaveClientGetAll:
@@ -622,17 +700,9 @@ class TestRemnawaveClientGetOne:
         """get_one should return None when resource not found (404)."""
         client = RemnawaveClient("https://api.example.com", "token")
         mocker.patch.object(
-            client, "_request", side_effect=Exception("API request failed (404): Not found")
-        )
-
-        result = client.get_one("/api/test/{uuid}", "123")
-        assert result is None
-
-    def test_returns_none_on_not_found_message(self, mocker):
-        """get_one should return None when error contains 'not found'."""
-        client = RemnawaveClient("https://api.example.com", "token")
-        mocker.patch.object(
-            client, "_request", side_effect=Exception("Resource not found")
+            client,
+            "_request",
+            side_effect=RemnawaveAPIError("Not found", status_code=404),
         )
 
         result = client.get_one("/api/test/{uuid}", "123")
@@ -642,12 +712,14 @@ class TestRemnawaveClientGetOne:
         """get_one should raise exception for non-404 errors."""
         client = RemnawaveClient("https://api.example.com", "token")
         mocker.patch.object(
-            client, "_request", side_effect=Exception("API request failed (500): Server error")
+            client,
+            "_request",
+            side_effect=RemnawaveAPIError("Server error", status_code=500),
         )
 
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(RemnawaveAPIError) as exc_info:
             client.get_one("/api/test/{uuid}", "123")
-        assert "500" in str(exc_info.value)
+        assert exc_info.value.status_code == 500
 
 
 class TestRemnawaveClientCreate:

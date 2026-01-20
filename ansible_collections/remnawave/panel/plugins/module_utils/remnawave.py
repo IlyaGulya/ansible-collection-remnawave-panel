@@ -18,6 +18,18 @@ import re
 from ansible.module_utils.six.moves.urllib.error import HTTPError, URLError
 from ansible.module_utils.urls import open_url
 
+
+class RemnawaveAPIError(Exception):
+    """Exception with structured error information for API failures."""
+
+    def __init__(self, message, status_code=None, response_body=None, url=None, method=None):
+        super().__init__(message)
+        self.status_code = status_code
+        self.response_body = response_body
+        self.url = url
+        self.method = method
+
+
 # Read-only fields that should be ignored during comparison
 READ_ONLY_FIELDS = {
     "uuid",
@@ -128,11 +140,12 @@ def _lists_equal(list1, list2):
 class RemnawaveClient:
     """HTTP client for Remnawave API."""
 
-    def __init__(self, api_url, api_token, module=None):
+    def __init__(self, api_url, api_token, validate_certs=True, timeout=30):
         """Initialize the client."""
         self.api_url = api_url.rstrip("/")
         self.api_token = api_token
-        self.module = module
+        self.validate_certs = validate_certs
+        self.timeout = timeout
 
     def _request(self, method, path, data=None):
         """Make an HTTP request to the API."""
@@ -148,7 +161,14 @@ class RemnawaveClient:
             body = json.dumps(data)
 
         try:
-            response = open_url(url, data=body, headers=headers, method=method, timeout=30)
+            response = open_url(
+                url,
+                data=body,
+                headers=headers,
+                method=method,
+                timeout=self.timeout,
+                validate_certs=self.validate_certs,
+            )
             response_body = response.read().decode("utf-8")
             if response_body:
                 return json.loads(response_body)
@@ -160,9 +180,20 @@ class RemnawaveClient:
                 error_msg = error_data.get("message", str(e))
             except (json.JSONDecodeError, KeyError):
                 error_msg = error_body or str(e)
-            raise Exception(f"API request failed ({e.code}): {error_msg}")
+                error_data = None
+            raise RemnawaveAPIError(
+                message=f"API request failed ({e.code}): {error_msg}",
+                status_code=e.code,
+                response_body=error_data or error_body,
+                url=url,
+                method=method,
+            )
         except URLError as e:
-            raise Exception(f"Failed to connect to API: {e.reason}")
+            raise RemnawaveAPIError(
+                message=f"Failed to connect to API: {e.reason}",
+                url=url,
+                method=method,
+            )
 
     def get_all(self, path, list_key=None):
         """Get all resources from a list endpoint.
@@ -194,14 +225,14 @@ class RemnawaveClient:
 
     def get_one(self, path_template, resource_id):
         """Get a single resource by ID."""
-        path = path_template.replace("{uuid}", resource_id)
+        path = re.sub(r"\{[^}]+\}", resource_id, path_template, count=1)
         try:
             response = self._request("GET", path)
             if response and "response" in response:
                 return response["response"]
             return response
-        except Exception as e:
-            if "404" in str(e) or "not found" in str(e).lower():
+        except RemnawaveAPIError as e:
+            if e.status_code == 404:
                 return None
             raise
 
@@ -215,7 +246,7 @@ class RemnawaveClient:
     def update(self, path_template, data, resource_id=None):
         """Update an existing resource."""
         if resource_id:
-            path = path_template.replace("{uuid}", resource_id)
+            path = re.sub(r"\{[^}]+\}", resource_id, path_template, count=1)
         else:
             path = path_template
         response = self._request("PATCH", path, data)
@@ -225,7 +256,7 @@ class RemnawaveClient:
 
     def delete(self, path_template, resource_id):
         """Delete a resource by ID."""
-        path = path_template.replace("{uuid}", resource_id)
+        path = re.sub(r"\{[^}]+\}", resource_id, path_template, count=1)
         return self._request("DELETE", path)
 
 
