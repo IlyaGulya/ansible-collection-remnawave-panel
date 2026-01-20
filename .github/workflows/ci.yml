@@ -53,8 +53,9 @@ jobs:
     name: Generate Test Matrix
     runs-on: ubuntu-latest
     outputs:
-      sanity_matrix: ${{ steps.generate.outputs.sanity_matrix }}
-      unit_matrix: ${{ steps.generate.outputs.unit_matrix }}
+      # Wrap tox-ansible array output in {include: [...]} for GitHub Actions matrix
+      sanity_matrix: '{"include": ${{ steps.sanity.outputs.envlist }}}'
+      unit_matrix: '{"include": ${{ steps.unit.outputs.envlist }}}'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -65,29 +66,13 @@ jobs:
           cache: true
           environments: dev
 
-      - name: Generate test matrices
-        id: generate
-        run: |
-          # tox-ansible outputs plain array, GitHub Actions needs {"include": [...]}
-          echo "Generating sanity matrix (debug run)..."
-          pixi run -vvv tox-matrix-sanity || true
+      - name: Generate sanity matrix
+        id: sanity
+        run: pixi run tox-matrix-sanity
 
-          echo "Generating sanity matrix (capture)..."
-          SANITY_ARRAY=$(pixi run -q tox-matrix-sanity)
-          echo "Sanity array: $SANITY_ARRAY"
-          SANITY_MATRIX=$(echo "$SANITY_ARRAY" | jq -c '{include: .}')
-          echo "sanity_matrix=$SANITY_MATRIX" >> $GITHUB_OUTPUT
-          echo "Sanity matrix: $SANITY_MATRIX"
-
-          echo "Generating unit matrix (debug run)..."
-          pixi run -vvv tox-matrix-unit || true
-
-          echo "Generating unit matrix (capture)..."
-          UNIT_ARRAY=$(pixi run -q tox-matrix-unit)
-          echo "Unit array: $UNIT_ARRAY"
-          UNIT_MATRIX=$(echo "$UNIT_ARRAY" | jq -c '{include: .}')
-          echo "unit_matrix=$UNIT_MATRIX" >> $GITHUB_OUTPUT
-          echo "Unit matrix: $UNIT_MATRIX"
+      - name: Generate unit matrix
+        id: unit
+        run: pixi run tox-matrix-unit
 
   sanity:
     name: Sanity (${{ matrix.name }})
