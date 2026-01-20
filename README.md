@@ -214,4 +214,4 @@ MIT
 ## Links
 
 - [Remnawave Panel](https://github.com/remnawave/panel)
-- [Remnawave Documentation](https://docs.remnawave.com)
+- [Remnawave Documentation](https://docs.rw/)
