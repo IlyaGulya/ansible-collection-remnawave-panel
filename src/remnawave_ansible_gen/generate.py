@@ -18,6 +18,21 @@ from jinja2 import Environment, FileSystemLoader
 from prance import ResolvingParser
 
 
+def read_pyproject_version(project_root: Path) -> str:
+    """Read version from pyproject.toml (source of truth)."""
+    pyproject_path = project_root / "pyproject.toml"
+    content = pyproject_path.read_text()
+    match = re.search(r'^version\s*=\s*"([^"]+)"', content, re.MULTILINE)
+    if not match:
+        raise ValueError("Could not find version in pyproject.toml")
+    return match.group(1)
+
+
+def extract_api_version(spec: dict[str, Any]) -> str:
+    """Extract API version from OpenAPI spec info.version."""
+    return str(spec.get("info", {}).get("version", "unknown"))
+
+
 @dataclass
 class DiscoveredEndpoint:
     """Discovered endpoint configuration."""
@@ -530,6 +545,8 @@ def render_module(
     module_config: dict[str, Any],
     spec: dict[str, Any],
     read_only_fields: list[str],
+    collection_version: str,
+    api_version: str,
 ) -> str:
     """Render an Ansible module from the template."""
     template = env.get_template("module.py.j2")
@@ -551,7 +568,7 @@ def render_module(
         if update_schema:
             update_fields = extract_fields_from_schema(update_schema, read_only_fields)
 
-    return template.render(
+    return str(template.render(
         module_name=module_config["name"],
         resource_name=module_config["resource_name"],
         description=module_config.get("description", f"Manage {module_config['resource_name']} resources"),
@@ -562,36 +579,38 @@ def render_module(
         update_fields=update_fields if update_fields else fields,
         read_only_fields=read_only_fields,
         resolve_uuid_by_name=module_config.get("resolve_uuid_by_name", False),
+        collection_version=collection_version,
+        api_version=api_version,
         to_snake_case=to_snake_case,
         to_camel_case=to_camel_case,
-    )
+    ))
 
 
 def render_module_utils(env: Environment, config: dict[str, Any]) -> str:
     """Render the shared module utilities."""
     template = env.get_template("module_utils.py.j2")
-    return template.render(
+    return str(template.render(
         read_only_fields=config.get("read_only_fields", []),
-    )
+    ))
 
 
 def format_code(file_path: Path) -> None:
-    """Format Python code using ruff."""
+    """Format Python code using ruff via uvx."""
     try:
         subprocess.run(
-            ["ruff", "format", str(file_path)],
+            ["uvx", "ruff", "format", str(file_path)],
             check=True,
             capture_output=True,
         )
         subprocess.run(
-            ["ruff", "check", "--fix", str(file_path)],
+            ["uvx", "ruff", "check", "--fix", str(file_path)],
             check=True,
             capture_output=True,
         )
     except subprocess.CalledProcessError as e:
         print(f"Warning: ruff formatting failed for {file_path}: {e.stderr.decode()}")
     except FileNotFoundError:
-        print("Warning: ruff not found, skipping formatting")
+        print("Warning: uvx not found, skipping formatting")
 
 
 # =============================================================================
@@ -900,6 +919,12 @@ def main() -> int:
     print(f"Loading OpenAPI spec from {spec_path}...")
     spec = load_openapi_spec(spec_path)
 
+    # Extract versions
+    collection_version = read_pyproject_version(project_root)
+    api_version = extract_api_version(spec)
+    print(f"Collection version: {collection_version}")
+    print(f"Remnawave API version: {api_version}")
+
     # Discover resources from OpenAPI spec
     resources = discover_resources(spec, config)
 
@@ -964,7 +989,7 @@ def main() -> int:
         module_read_only = read_only_by_module.get(module_name, read_only_fields)
 
         try:
-            module_code = render_module(env, module_config, spec, module_read_only)
+            module_code = render_module(env, module_config, spec, module_read_only, collection_version, api_version)
             module_path = modules_dir / f"{module_name}.py"
 
             with open(module_path, "w") as f:
@@ -989,6 +1014,21 @@ def main() -> int:
         except Exception as e:
             print(f"  -> Error generating examples: {e}")
             return 1
+
+    # Generate version_info.yml manifest
+    meta_dir = project_root / "ansible_collections" / "remnawave" / "panel" / "meta"
+    meta_dir.mkdir(parents=True, exist_ok=True)
+    version_info_path = meta_dir / "version_info.yml"
+    version_info = {
+        "collection_version": collection_version,
+        "remnawave_api_version": api_version,
+        "generator_version": collection_version,
+    }
+    print(f"\nGenerating {version_info_path}...")
+    with open(version_info_path, "w") as f:
+        f.write("# Auto-generated - DO NOT EDIT\n")
+        yaml.dump(version_info, f, default_flow_style=False, sort_keys=False)
+    print(f"  -> Generated {version_info_path}")
 
     print("\nGeneration complete!")
     return 0

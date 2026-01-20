@@ -21,10 +21,10 @@ uv run generate
 uv run generate --dry-run
 
 # Run linter on generator code
-uv run ruff check src/
+uvx ruff check src/
 
 # Run type checker on generator code
-uv run mypy src/
+uvx mypy src/
 
 # Check if generated code is in sync with spec
 bash scripts/check-freshness.sh

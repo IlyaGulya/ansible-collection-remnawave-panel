@@ -8,11 +8,11 @@ dependencies = [
     "openapi-spec-validator>=0.7.0",
     "jinja2>=3.1.0",
     "pyyaml>=6.0",
-    "ruff>=0.4.0",
 ]
 
 [project.scripts]
 generate = "remnawave_ansible_gen.generate:main"
+version = "remnawave_ansible_gen.version:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -27,8 +27,6 @@ dev = [
     "ansible-lint>=24.0.0",
     "molecule>=6.0.0",
     "molecule-docker>=2.1.0",
-    "mypy>=1.13.0",
-    "types-PyYAML>=6.0.12",
 ]
 
 [tool.ruff]
@@ -65,5 +63,9 @@ module = [
     "prance.*",
     "openapi_spec_validator",
     "openapi_spec_validator.*",
+    "jinja2",
+    "jinja2.*",
+    "yaml",
+    "yaml.*",
 ]
 ignore_missing_imports = true

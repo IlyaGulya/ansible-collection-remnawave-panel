@@ -2,7 +2,7 @@
 
 Ansible collection for managing [Remnawave](https://github.com/remnawave/panel) VPN panel resources.
 
-**Collection version:** 2.5.3 (aligned with Remnawave API)
+**Collection version:** 0.1.0 (generated from Remnawave API 2.5.3)
 
 ## Table of Contents
 
@@ -27,7 +27,7 @@ Or add to `requirements.yml`:
 ```yaml
 collections:
   - name: remnawave.panel
-    version: ">=2.5.3"
+    version: ">=0.1.0"
 ```
 
 ## Quick Start

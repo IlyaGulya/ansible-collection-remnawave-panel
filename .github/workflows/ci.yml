@@ -24,10 +24,13 @@ jobs:
         run: uv sync
 
       - name: Lint generator code
-        run: uv run ruff check src/
+        run: uvx ruff check src/
 
       - name: Type check generator code
-        run: uv run mypy src/
+        run: uvx mypy src/
+
+      - name: Check version sync
+        run: uv run version check
 
       - name: Check freshness
         run: bash scripts/check-freshness.sh
