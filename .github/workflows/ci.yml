@@ -67,30 +67,30 @@ jobs:
 
       - name: Generate test matrices
         id: generate
+        working-directory: ansible_collections/remnawave/panel
         run: |
           # tox-ansible outputs plain array, GitHub Actions needs {"include": [...]}
-          cd ansible_collections/remnawave/panel
-
           echo "Checking tox-ansible.ini exists..."
           ls -la tox-ansible.ini
+          echo "Current directory: $(pwd)"
 
           echo "Activating pixi dev environment..."
-          # Use eval to run in pixi shell context
           eval "$(pixi shell-hook -e dev -m $GITHUB_WORKSPACE/pyproject.toml)"
-          echo "PATH: $PATH"
-          which tox
-          tox --version
+
+          # Use absolute path for tox config
+          TOX_CONFIG="$(pwd)/tox-ansible.ini"
+          echo "Using tox config: $TOX_CONFIG"
 
           echo "Generating sanity matrix..."
-          tox --ansible --gh-matrix --matrix-scope sanity --conf tox-ansible.ini
-          SANITY_ARRAY=$(tox --ansible --gh-matrix --matrix-scope sanity --conf tox-ansible.ini)
+          tox --ansible --gh-matrix --matrix-scope sanity --conf "$TOX_CONFIG" --root "$(pwd)"
+          SANITY_ARRAY=$(tox --ansible --gh-matrix --matrix-scope sanity --conf "$TOX_CONFIG" --root "$(pwd)")
           echo "Sanity array: $SANITY_ARRAY"
           SANITY_MATRIX=$(echo "$SANITY_ARRAY" | jq -c '{include: .}')
           echo "sanity_matrix=$SANITY_MATRIX" >> $GITHUB_OUTPUT
           echo "Sanity matrix: $SANITY_MATRIX"
 
           echo "Generating unit matrix..."
-          UNIT_ARRAY=$(tox --ansible --gh-matrix --matrix-scope unit --conf tox-ansible.ini)
+          UNIT_ARRAY=$(tox --ansible --gh-matrix --matrix-scope unit --conf "$TOX_CONFIG" --root "$(pwd)")
           echo "Unit array: $UNIT_ARRAY"
           UNIT_MATRIX=$(echo "$UNIT_ARRAY" | jq -c '{include: .}')
           echo "unit_matrix=$UNIT_MATRIX" >> $GITHUB_OUTPUT
