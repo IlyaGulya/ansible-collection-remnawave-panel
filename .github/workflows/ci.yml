@@ -68,14 +68,17 @@ jobs:
       - name: Generate test matrices
         id: generate
         run: |
+          # Use -q to suppress pixi status lines that break JSON parsing
           # tox-ansible outputs plain array, GitHub Actions needs {"include": [...]}
-          SANITY_ARRAY=$(pixi run tox-matrix-sanity 2>/dev/null || echo '[]')
+          SANITY_ARRAY=$(pixi run -q tox-matrix-sanity 2>/dev/null || echo '[]')
           SANITY_MATRIX=$(echo "$SANITY_ARRAY" | jq -c '{include: .}')
           echo "sanity_matrix=$SANITY_MATRIX" >> $GITHUB_OUTPUT
+          echo "Sanity matrix: $SANITY_MATRIX"
 
-          UNIT_ARRAY=$(pixi run tox-matrix-unit 2>/dev/null || echo '[]')
+          UNIT_ARRAY=$(pixi run -q tox-matrix-unit 2>/dev/null || echo '[]')
           UNIT_MATRIX=$(echo "$UNIT_ARRAY" | jq -c '{include: .}')
           echo "unit_matrix=$UNIT_MATRIX" >> $GITHUB_OUTPUT
+          echo "Unit matrix: $UNIT_MATRIX"
 
   sanity:
     name: Sanity (${{ matrix.name }})
