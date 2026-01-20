@@ -278,10 +278,12 @@ def list_example_files(resources: list[DiscoveredResource]) -> list[str]:
 
     for resource in resources:
         module_name = resource.module_name
-        files.extend([
-            f"basic/{module_name}_create.yml",
-            f"basic/{module_name}_update.yml",
-            f"basic/{module_name}_delete.yml",
-        ])
+        files.extend(
+            [
+                f"basic/{module_name}_create.yml",
+                f"basic/{module_name}_update.yml",
+                f"basic/{module_name}_delete.yml",
+            ]
+        )
 
     return sorted(files)

@@ -48,34 +48,38 @@ def render_module(
         if update_schema:
             update_fields = extract_fields_from_schema(update_schema, read_only_fields)
 
-    return str(template.render(
-        module_name=module_config["name"],
-        resource_name=module_config["resource_name"],
-        description=module_config.get("description", f"Manage {module_config['resource_name']} resources"),
-        id_param=module_config["id_param"],
-        lookup_field=module_config["lookup_field"],
-        endpoints=module_config["endpoints"],
-        fields=fields,
-        update_fields=update_fields if update_fields else fields,
-        read_only_fields=read_only_fields,
-        resolve_uuid_by_name=module_config.get("resolve_uuid_by_name", False),
-        collection_version=collection_version,
-        api_version=api_version,
-        to_snake_case=to_snake_case,
-        to_camel_case=to_camel_case,
-    ))
+    return str(
+        template.render(
+            module_name=module_config["name"],
+            resource_name=module_config["resource_name"],
+            description=module_config.get("description", f"Manage {module_config['resource_name']} resources"),
+            id_param=module_config["id_param"],
+            lookup_field=module_config["lookup_field"],
+            endpoints=module_config["endpoints"],
+            fields=fields,
+            update_fields=update_fields if update_fields else fields,
+            read_only_fields=read_only_fields,
+            resolve_uuid_by_name=module_config.get("resolve_uuid_by_name", False),
+            collection_version=collection_version,
+            api_version=api_version,
+            to_snake_case=to_snake_case,
+            to_camel_case=to_camel_case,
+        )
+    )
 
 
 def render_module_utils(env: Environment, config: dict[str, Any]) -> str:
     """Render the shared module utilities."""
     template = env.get_template("module_utils.py.j2")
-    return str(template.render(
-        read_only_fields=config.get("read_only_fields", []),
-    ))
+    return str(
+        template.render(
+            read_only_fields=config.get("read_only_fields", []),
+        )
+    )
 
 
 def format_code(file_path: Path, project_root: Path | None = None) -> None:
-    """Format Python code using ruff via uvx.
+    """Format Python code using ruff.
 
     Args:
         file_path: Path to the file to format.
@@ -96,13 +100,13 @@ def format_code(file_path: Path, project_root: Path | None = None) -> None:
 
     try:
         subprocess.run(
-            ["uvx", "ruff", "format", target],
+            ["ruff", "format", target],
             check=True,
             capture_output=True,
             cwd=cwd,
         )
         subprocess.run(
-            ["uvx", "ruff", "check", "--fix", target],
+            ["ruff", "check", "--fix", target],
             check=True,
             capture_output=True,
             cwd=cwd,
@@ -113,4 +117,4 @@ def format_code(file_path: Path, project_root: Path | None = None) -> None:
         if error_output:
             print(f"Warning: ruff formatting failed for {file_path}: {error_output}")
     except FileNotFoundError:
-        print("Warning: uvx not found, skipping formatting")
+        print("Warning: ruff not found, skipping formatting")

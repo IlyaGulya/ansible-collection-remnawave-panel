@@ -1745,10 +1745,10 @@ packages:
 - pypi: ./
   name: remnawave-ansible-gen
   version: 0.1.0
-  sha256: fe480e3e9756da934297cf1e9de78768ac595b9cff71531594437e7bb03f60bf
+  sha256: 1d92bdca4fa5744a5109aa969da1de07ebbfdd08eb3caecb105b19dffe93a975
   requires_dist:
-  - prance>=23.6.0
-  - openapi-spec-validator>=0.7.0
+  - prance>=25.4.8.0
+  - openapi-spec-validator>=0.7.2
   - jinja2>=3.1.0
   - pyyaml>=6.0
   requires_python: '>=3.11'

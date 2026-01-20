@@ -4,8 +4,8 @@ version = "0.1.0"
 description = "Generator for Remnawave Ansible modules"
 requires-python = ">=3.11"
 dependencies = [
-    "prance>=23.6.0",
-    "openapi-spec-validator>=0.7.0",
+    "prance>=25.4.8.0",
+    "openapi-spec-validator>=0.7.2",
     "jinja2>=3.1.0",
     "pyyaml>=6.0",
 ]
@@ -99,7 +99,7 @@ lint-fix = "ruff check --fix src/"
 format = "ruff format src/"
 format-check = "ruff format --check src/"
 typecheck = "mypy src/"
-ansible-lint = { cmd = "ansible-lint", cwd = "ansible_collections/remnawave/panel" }
+ansible-lint = { cmd = "ansible-lint", cwd = "ansible_collections/remnawave/panel", env = { ANSIBLE_COLLECTIONS_PATH = "../../.." } }
 molecule-test = { cmd = "molecule test -s e2e", cwd = "ansible_collections/remnawave/panel" }
 molecule-create = { cmd = "molecule create -s e2e", cwd = "ansible_collections/remnawave/panel" }
 molecule-converge = { cmd = "molecule converge -s e2e", cwd = "ansible_collections/remnawave/panel" }

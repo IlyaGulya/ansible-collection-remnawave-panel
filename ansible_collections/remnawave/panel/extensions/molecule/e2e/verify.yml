@@ -5,8 +5,6 @@
   vars:
     api_url: "http://localhost:8080"
     api_token: "{{ lookup('file', molecule_scenario_directory + '/.api-token') | trim }}"
-  collections:
-    - remnawave.panel
 
   tasks:
     # ===========================================

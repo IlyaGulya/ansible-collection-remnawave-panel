@@ -4,3 +4,12 @@
 # which is a valid ansible-test ignore
 skip_list:
   - sanity[cannot-ignore]
+
+exclude_paths:
+  - .ansible/
+  - .tox/
+  # docker-compose.yml is not a playbook
+  - extensions/molecule/e2e/docker-compose.yml
+  # create/destroy use community.docker which is installed separately for molecule
+  - extensions/molecule/e2e/create.yml
+  - extensions/molecule/e2e/destroy.yml

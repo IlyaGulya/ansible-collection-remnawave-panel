@@ -81,9 +81,7 @@ def read_readme_requirements_version() -> str:
 
 def read_version_info() -> dict[str, Any] | None:
     """Read version_info.yml if it exists."""
-    version_info_path = (
-        get_project_root() / "ansible_collections" / "remnawave" / "panel" / "meta" / "version_info.yml"
-    )
+    version_info_path = get_project_root() / "ansible_collections" / "remnawave" / "panel" / "meta" / "version_info.yml"
     if not version_info_path.exists():
         return None
     with open(version_info_path) as f:
@@ -160,8 +158,7 @@ def check_versions() -> bool:
             )
         if version_info.get("remnawave_api_version") != api_version:
             errors.append(
-                f"version_info.yml (api): expected {api_version}, "
-                f"got {version_info.get('remnawave_api_version')}"
+                f"version_info.yml (api): expected {api_version}, got {version_info.get('remnawave_api_version')}"
             )
 
     if errors:

@@ -7,8 +7,6 @@
     api_token: "{{ lookup('file', molecule_scenario_directory + '/.api-token') | trim }}"
   vars_files:
     - vars/test_data.yml
-  collections:
-    - remnawave.panel
 
   tasks:
     - name: Run config profile tests
