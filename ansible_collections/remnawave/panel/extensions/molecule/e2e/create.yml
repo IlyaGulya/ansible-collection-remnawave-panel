@@ -18,6 +18,11 @@
     # Cleanup existing environment
     # ===========================================
 
+    - name: Check if env file exists
+      ansible.builtin.stat:
+        path: "{{ env_file }}"
+      register: env_file_stat
+
     - name: Stop and remove existing containers
       community.docker.docker_compose_v2:
         project_src: "{{ scenario_dir }}"
@@ -26,6 +31,7 @@
         state: absent
         remove_volumes: true
         remove_orphans: true
+      when: env_file_stat.stat.exists
       ignore_errors: true
 
     # ===========================================
