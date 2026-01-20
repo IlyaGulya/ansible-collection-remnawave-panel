@@ -11,7 +11,7 @@ dependencies = [
 ]
 
 [project.scripts]
-generate = "remnawave_ansible_gen.generate:main"
+generate = "remnawave_ansible_gen.cli:main"
 version = "remnawave_ansible_gen.version:main"
 
 [build-system]
@@ -38,7 +38,7 @@ select = ["E", "F", "I", "W"]
 ignore = ["E501"]
 
 [tool.ruff.lint.per-file-ignores]
-"collection/**/*.py" = ["E402"]
+"ansible_collections/**/*.py" = ["E402"]
 
 [tool.ruff.format]
 quote-style = "double"
