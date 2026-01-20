@@ -1,0 +1,185 @@
+---
+- name: Create E2E environment
+  hosts: localhost
+  gather_facts: false
+  vars:
+    scenario_dir: "{{ molecule_scenario_directory | default(playbook_dir) }}"
+    env_file: "{{ scenario_dir }}/.env.e2e"
+    api_token_file: "{{ scenario_dir }}/.api-token"
+    e2e_username: "e2eadmin"
+    e2e_password: "E2eTestPassword1234567890"
+    backend_url: "http://localhost:3000"
+    proxy_url: "http://localhost:8080"
+    max_retries: 30
+    retry_delay: 2
+
+  tasks:
+    # ===========================================
+    # Cleanup existing environment
+    # ===========================================
+
+    - name: Stop and remove existing containers
+      community.docker.docker_compose_v2:
+        project_src: "{{ scenario_dir }}"
+        env_files:
+          - "{{ env_file }}"
+        state: absent
+        remove_volumes: true
+        remove_orphans: true
+      ignore_errors: true
+
+    # ===========================================
+    # Generate secrets and environment
+    # ===========================================
+
+    - name: Generate JWT auth secret
+      ansible.builtin.set_fact:
+        jwt_auth_secret: "{{ lookup('password', '/dev/null chars=hexdigits length=128') }}"
+
+    - name: Generate JWT API tokens secret
+      ansible.builtin.set_fact:
+        jwt_api_tokens_secret: "{{ lookup('password', '/dev/null chars=hexdigits length=128') }}"
+
+    - name: Write environment file
+      ansible.builtin.template:
+        src: templates/env.e2e.j2
+        dest: "{{ env_file }}"
+        mode: "0600"
+
+    # ===========================================
+    # Start Docker containers
+    # ===========================================
+
+    - name: Start Docker containers
+      community.docker.docker_compose_v2:
+        project_src: "{{ scenario_dir }}"
+        env_files:
+          - "{{ env_file }}"
+        state: present
+        wait: true
+        wait_timeout: 120
+      register: compose_result
+
+    - name: Display container status
+      ansible.builtin.debug:
+        msg: "Containers started: {{ compose_result.containers | map(attribute='Name') | list }}"
+
+    # ===========================================
+    # Wait for services to be healthy
+    # ===========================================
+
+    - name: Wait for backend API to respond
+      ansible.builtin.uri:
+        url: "{{ backend_url }}/api/auth/login"
+        method: POST
+        body_format: json
+        body:
+          username: "_healthcheck_"
+          password: "_healthcheck_"
+        headers:
+          X-Forwarded-Proto: https
+          X-Forwarded-For: 127.0.0.1
+        status_code: [400, 401, 403, 404, 422]
+        validate_certs: false
+      register: health_check
+      until: health_check.status in [400, 401, 403, 404, 422]
+      retries: "{{ max_retries }}"
+      delay: "{{ retry_delay }}"
+
+    - name: Backend is ready
+      ansible.builtin.debug:
+        msg: "Backend API is responding"
+
+    # ===========================================
+    # Register admin user and get API token
+    # ===========================================
+
+    - name: Register admin user
+      ansible.builtin.uri:
+        url: "{{ backend_url }}/api/auth/register"
+        method: POST
+        body_format: json
+        body:
+          username: "{{ e2e_username }}"
+          password: "{{ e2e_password }}"
+        headers:
+          X-Forwarded-Proto: https
+          X-Forwarded-For: 127.0.0.1
+        status_code: [200, 201, 400, 409]
+        validate_certs: false
+      register: register_result
+
+    - name: User registration result
+      ansible.builtin.debug:
+        msg: "Registration status: {{ register_result.status }}"
+
+    - name: Login to get JWT
+      ansible.builtin.uri:
+        url: "{{ backend_url }}/api/auth/login"
+        method: POST
+        body_format: json
+        body:
+          username: "{{ e2e_username }}"
+          password: "{{ e2e_password }}"
+        headers:
+          X-Forwarded-Proto: https
+          X-Forwarded-For: 127.0.0.1
+        status_code: [200, 201]
+        validate_certs: false
+      register: login_result
+
+    - name: Extract JWT token
+      ansible.builtin.set_fact:
+        jwt_token: "{{ login_result.json.response.accessToken }}"
+
+    - name: Create API token
+      ansible.builtin.uri:
+        url: "{{ backend_url }}/api/tokens"
+        method: POST
+        body_format: json
+        body:
+          tokenName: "e2e-test-token"
+        headers:
+          Authorization: "Bearer {{ jwt_token }}"
+          X-Forwarded-Proto: https
+          X-Forwarded-For: 127.0.0.1
+          X-Remnawave-Client-Type: browser
+        status_code: [200, 201]
+        validate_certs: false
+      register: token_result
+
+    - name: Extract API token
+      ansible.builtin.set_fact:
+        api_token: "{{ token_result.json.response.token }}"
+
+    - name: Save API token to file
+      ansible.builtin.copy:
+        content: "{{ api_token }}"
+        dest: "{{ api_token_file }}"
+        mode: "0600"
+
+    # ===========================================
+    # Wait for reverse proxy
+    # ===========================================
+
+    - name: Wait for reverse proxy to respond
+      ansible.builtin.uri:
+        url: "{{ proxy_url }}/api/auth/login"
+        method: POST
+        body_format: json
+        body:
+          username: "_healthcheck_"
+          password: "_healthcheck_"
+        status_code: [400, 401, 403, 404, 422]
+        validate_certs: false
+      register: proxy_check
+      until: proxy_check.status in [400, 401, 403, 404, 422]
+      retries: "{{ max_retries }}"
+      delay: "{{ retry_delay }}"
+
+    - name: E2E environment ready
+      ansible.builtin.debug:
+        msg: |
+          E2E Setup Complete!
+          API Token has been saved to {{ api_token_file }}
+          API URL: {{ proxy_url }}

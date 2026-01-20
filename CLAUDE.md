@@ -8,6 +8,8 @@ This is a code generator that produces Ansible modules from the Remnawave Panel 
 
 ## Commands
 
+### Generator Commands
+
 ```bash
 # Install dependencies
 uv sync --all-extras
@@ -26,23 +28,40 @@ uv run mypy src/
 
 # Check if generated code is in sync with spec
 bash scripts/check-freshness.sh
+```
 
-# Run E2E tests (real Remnawave backend in Docker)
-# Molecule handles setup/teardown automatically
+### Testing with tox-ansible
+
+Used for sanity and unit tests with automatic Python/Ansible version matrix:
+
+```bash
+cd ansible_collections/remnawave/panel
+
+# List available test environments
+tox list --ansible --conf tox-ansible.ini
+
+# Run sanity tests
+tox --ansible -e sanity-py3.11-2.18 --conf tox-ansible.ini
+
+# Run unit tests
+tox --ansible -e unit-py3.11-2.18 --conf tox-ansible.ini
+```
+
+### E2E Tests with Molecule
+
+E2E tests run directly via molecule (not through tox-ansible due to pytest-ansible path limitations):
+
+```bash
+cd ansible_collections/remnawave/panel
+
+# Run full E2E test sequence
 uv run molecule test -s e2e
 
-# E2E debugging mode (manual control over environment lifecycle)
-# Use these scripts ONLY when debugging tests step-by-step
-bash scripts/e2e-setup.sh            # Start containers, get API token
-uv run molecule converge -s e2e      # Run converge only (no setup/teardown)
-uv run molecule verify -s e2e        # Run verify only
-bash scripts/e2e-teardown.sh         # Cleanup when done
-
-# Run Ansible sanity tests on collection
-cd ansible_collections/remnawave/panel && ansible-test sanity --docker default
-
-# Run Ansible unit tests on collection
-cd ansible_collections/remnawave/panel && ansible-test units --docker default -v
+# Run individual stages for debugging
+uv run molecule create -s e2e    # Start containers
+uv run molecule converge -s e2e  # Run tests
+uv run molecule verify -s e2e    # Verify cleanup
+uv run molecule destroy -s e2e   # Teardown
 ```
 
 ## Architecture
@@ -80,9 +99,13 @@ ansible_collections/remnawave/panel/plugins/module_utils/remnawave.py (generated
 
 ### Testing Infrastructure
 
-- **`molecule/e2e/`**: E2E tests against real Remnawave backend in Docker
+- **tox-ansible**: Used for sanity and unit tests with automatic Python/Ansible version matrix
+  - `tox-ansible.ini`: Version skip rules (skips py3.9/3.10, ansible < 2.15)
+  - `test-requirements.txt`: Test dependencies
+- **Molecule E2E tests**: `extensions/molecule/e2e/`
   - Uses Caddy reverse proxy to inject required `X-Forwarded-Proto: https` header
   - PostgreSQL + Valkey + Backend containers via docker-compose
+  - Ansible-native create/destroy playbooks
 
 ## Remnawave API Quirks
 
@@ -140,6 +163,5 @@ Useful locations:
 
 ### Molecule Configuration Notes
 
-- **ansible-native config**: Use `ansible:` section with `env:` for environment variables (modern approach)
-- **ANSIBLE_COLLECTIONS_PATH**: Must be relative to scenario directory (e.g., `../..` from `molecule/e2e/` to reach project root)
-- **cwd for ansible-playbook**: Molecule runs ansible-playbook from `self._config.scenario_path` (e.g., `molecule/e2e/`), so paths must be relative to that
+- **ANSIBLE_COLLECTIONS_PATH**: Configured in `molecule.yml` via `MOLECULE_PROJECT_DIRECTORY` environment variable
+- **molecule_scenario_directory**: Use this variable in playbooks for file paths (e.g., for `.api-token` file location)

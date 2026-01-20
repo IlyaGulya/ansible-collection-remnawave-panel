@@ -1,0 +1,56 @@
+---
+- name: Destroy E2E environment
+  hosts: localhost
+  gather_facts: false
+  vars:
+    scenario_dir: "{{ molecule_scenario_directory | default(playbook_dir) }}"
+    env_file: "{{ scenario_dir }}/.env.e2e"
+    api_token_file: "{{ scenario_dir }}/.api-token"
+
+  tasks:
+    # ===========================================
+    # Stop and remove containers
+    # ===========================================
+
+    - name: Check if env file exists
+      ansible.builtin.stat:
+        path: "{{ env_file }}"
+      register: env_file_stat
+
+    - name: Stop and remove containers with env file
+      community.docker.docker_compose_v2:
+        project_src: "{{ scenario_dir }}"
+        env_files:
+          - "{{ env_file }}"
+        state: absent
+        remove_volumes: true
+        remove_orphans: true
+      when: env_file_stat.stat.exists
+      ignore_errors: true
+
+    - name: Stop and remove containers without env file
+      community.docker.docker_compose_v2:
+        project_src: "{{ scenario_dir }}"
+        state: absent
+        remove_volumes: true
+        remove_orphans: true
+      when: not env_file_stat.stat.exists
+      ignore_errors: true
+
+    # ===========================================
+    # Cleanup generated files
+    # ===========================================
+
+    - name: Remove environment file
+      ansible.builtin.file:
+        path: "{{ env_file }}"
+        state: absent
+
+    - name: Remove API token file
+      ansible.builtin.file:
+        path: "{{ api_token_file }}"
+        state: absent
+
+    - name: E2E teardown complete
+      ansible.builtin.debug:
+        msg: "E2E environment has been destroyed"

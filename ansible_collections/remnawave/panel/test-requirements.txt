@@ -1,0 +1,6 @@
+pytest>=7.0
+pytest-mock>=3.10
+pytest-ansible>=24.1.0
+molecule>=6.0.0
+molecule-plugins[docker]>=23.5.0
+docker>=6.0.0

@@ -5,7 +5,7 @@
   tasks:
     - name: Verify API token file exists
       ansible.builtin.stat:
-        path: "{{ playbook_dir }}/.api-token"
+        path: "{{ molecule_scenario_directory }}/.api-token"
       register: token_file
 
     - name: Fail if API token file not found

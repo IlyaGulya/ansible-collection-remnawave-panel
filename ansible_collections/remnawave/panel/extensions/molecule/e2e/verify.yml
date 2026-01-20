@@ -4,7 +4,7 @@
   gather_facts: false
   vars:
     api_url: "http://localhost:8080"
-    api_token: "{{ lookup('file', playbook_dir + '/.api-token') | trim }}"
+    api_token: "{{ lookup('file', molecule_scenario_directory + '/.api-token') | trim }}"
   collections:
     - remnawave.panel
 

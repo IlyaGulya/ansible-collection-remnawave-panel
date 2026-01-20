@@ -7,7 +7,7 @@ on:
     branches: [main, master]
 
 jobs:
-  validate:
+  validate-generator:
     name: Validate Generator
     runs-on: ubuntu-latest
     steps:
@@ -32,54 +32,6 @@ jobs:
       - name: Check freshness
         run: bash scripts/check-freshness.sh
 
-  test-e2e:
-    name: Run E2E Tests (Real Panel)
-    needs: validate
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-        with:
-          python-version: "3.11"
-          enable-cache: true
-
-      - name: Install dependencies (with dev)
-        run: uv sync --all-extras
-
-      - name: Run E2E setup
-        run: bash scripts/e2e-setup.sh
-
-      - name: Run Molecule E2E tests
-        run: |
-          export E2E_API_TOKEN=$(cat molecule/e2e/.api-token)
-          uv run molecule test -s e2e
-        env:
-          ANSIBLE_COLLECTIONS_PATH: ${{ github.workspace }}
-
-      - name: Collect container logs on failure
-        if: failure()
-        run: |
-          cd molecule/e2e
-          docker compose logs > docker-logs.txt 2>&1 || true
-          echo "=== Docker Compose Logs ==="
-          cat docker-logs.txt || true
-
-      - name: Upload logs on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: e2e-docker-logs
-          path: molecule/e2e/docker-logs.txt
-          retention-days: 7
-
-      - name: Run E2E teardown
-        if: always()
-        run: bash scripts/e2e-teardown.sh
-
   lint-collection:
     name: Lint Ansible Collection
     runs-on: ubuntu-latest
@@ -101,29 +53,87 @@ jobs:
         run: uv run ansible-lint
         continue-on-error: true
 
-  sanity:
-    name: Ansible Sanity Tests
+  generate-matrix:
+    name: Generate Test Matrix
     runs-on: ubuntu-latest
+    outputs:
+      sanity_matrix: ${{ steps.generate.outputs.sanity_matrix }}
+      unit_matrix: ${{ steps.generate.outputs.unit_matrix }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          enable-cache: true
 
-      - name: Install dependencies
-        run: uv sync
+      - name: Install tox-ansible
+        run: pip install tox-ansible
+
+      - name: Generate test matrices
+        id: generate
+        working-directory: ansible_collections/remnawave/panel
+        run: |
+          # Generate sanity matrix
+          SANITY_MATRIX=$(tox --ansible --gh-matrix --matrix-scope sanity --conf tox-ansible.ini 2>/dev/null || echo '{"include":[]}')
+          echo "sanity_matrix=$SANITY_MATRIX" >> $GITHUB_OUTPUT
+
+          # Generate unit matrix
+          UNIT_MATRIX=$(tox --ansible --gh-matrix --matrix-scope unit --conf tox-ansible.ini 2>/dev/null || echo '{"include":[]}')
+          echo "unit_matrix=$UNIT_MATRIX" >> $GITHUB_OUTPUT
+
+  sanity:
+    name: Sanity (${{ matrix.name }})
+    needs: [validate-generator, generate-matrix]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.sanity_matrix) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install tox-ansible
+        run: pip install tox-ansible
 
       - name: Run sanity tests
         working-directory: ansible_collections/remnawave/panel
-        run: uv run ansible-test sanity --docker default
+        run: tox --ansible -e ${{ matrix.name }} --conf tox-ansible.ini
 
-  unit-tests:
-    name: Unit Tests
+  unit:
+    name: Unit (${{ matrix.name }})
+    needs: [validate-generator, generate-matrix]
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.unit_matrix) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install tox-ansible
+        run: pip install tox-ansible
+
+      - name: Run unit tests
+        working-directory: ansible_collections/remnawave/panel
+        run: tox --ansible -e ${{ matrix.name }} --conf tox-ansible.ini
+
+  e2e:
+    name: E2E Tests
+    needs: validate-generator
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -135,8 +145,33 @@ jobs:
           enable-cache: true
 
       - name: Install dependencies
-        run: uv sync
+        run: uv sync --all-extras
 
-      - name: Run unit tests
+      - name: Install community.docker collection
+        run: uv run ansible-galaxy collection install community.docker
+
+      - name: Run E2E tests
         working-directory: ansible_collections/remnawave/panel
-        run: uv run ansible-test units --docker default -v
+        run: uv run molecule test -s e2e
+
+      - name: Collect container logs on failure
+        if: failure()
+        run: |
+          cd ansible_collections/remnawave/panel/extensions/molecule/e2e
+          docker compose logs > docker-logs.txt 2>&1 || true
+          echo "=== Docker Compose Logs ==="
+          cat docker-logs.txt || true
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-docker-logs
+          path: ansible_collections/remnawave/panel/extensions/molecule/e2e/docker-logs.txt
+          retention-days: 7
+
+      - name: Cleanup Docker containers
+        if: always()
+        run: |
+          cd ansible_collections/remnawave/panel/extensions/molecule/e2e
+          docker compose down -v --remove-orphans 2>/dev/null || true

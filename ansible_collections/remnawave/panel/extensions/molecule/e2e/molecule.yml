@@ -1,6 +1,8 @@
 ---
 dependency:
   name: galaxy
+  options:
+    requirements-file: requirements.yml
 driver:
   name: default
 platforms:
@@ -9,14 +11,14 @@ platforms:
 provisioner:
   name: ansible
   env:
-    ANSIBLE_COLLECTIONS_PATH: "../.."
+    ANSIBLE_COLLECTIONS_PATH: ${MOLECULE_PROJECT_DIRECTORY}/../..
   inventory:
     host_vars:
       localhost:
         ansible_connection: local
         ansible_python_interpreter: "{{ ansible_playbook_python }}"
         api_url: "http://localhost:8080"
-        api_token: "{{ lookup('file', '${MOLECULE_SCENARIO_DIRECTORY}/.api-token') | trim }}"
+        api_token: "{{ lookup('file', molecule_scenario_directory + '/.api-token') | trim }}"
 verifier:
   name: ansible
 scenario:
@@ -27,6 +29,5 @@ scenario:
     - create
     - prepare
     - converge
-    # idempotence removed: converge includes delete tests and tests idempotency inline
     - verify
     - destroy
