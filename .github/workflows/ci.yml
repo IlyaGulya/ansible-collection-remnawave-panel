@@ -67,23 +67,23 @@ jobs:
 
       - name: Generate test matrices
         id: generate
-        working-directory: ansible_collections/remnawave/panel
         run: |
           # tox-ansible outputs plain array, GitHub Actions needs {"include": [...]}
-          # Run tox directly since pixi task cwd doesn't seem to work in CI
+          cd ansible_collections/remnawave/panel
+
           echo "Checking tox-ansible.ini exists..."
           ls -la tox-ansible.ini
 
           echo "Generating sanity matrix..."
-          pixi run -vv tox -- --ansible --gh-matrix --matrix-scope sanity --conf tox-ansible.ini
-          SANITY_ARRAY=$(pixi run -q tox -- --ansible --gh-matrix --matrix-scope sanity --conf tox-ansible.ini)
+          pixi run -vv -m $GITHUB_WORKSPACE/pyproject.toml tox -- --ansible --gh-matrix --matrix-scope sanity --conf tox-ansible.ini
+          SANITY_ARRAY=$(pixi run -q -m $GITHUB_WORKSPACE/pyproject.toml tox -- --ansible --gh-matrix --matrix-scope sanity --conf tox-ansible.ini)
           echo "Sanity array: $SANITY_ARRAY"
           SANITY_MATRIX=$(echo "$SANITY_ARRAY" | jq -c '{include: .}')
           echo "sanity_matrix=$SANITY_MATRIX" >> $GITHUB_OUTPUT
           echo "Sanity matrix: $SANITY_MATRIX"
 
           echo "Generating unit matrix..."
-          UNIT_ARRAY=$(pixi run -q tox -- --ansible --gh-matrix --matrix-scope unit --conf tox-ansible.ini)
+          UNIT_ARRAY=$(pixi run -q -m $GITHUB_WORKSPACE/pyproject.toml tox -- --ansible --gh-matrix --matrix-scope unit --conf tox-ansible.ini)
           echo "Unit array: $UNIT_ARRAY"
           UNIT_MATRIX=$(echo "$UNIT_ARRAY" | jq -c '{include: .}')
           echo "unit_matrix=$UNIT_MATRIX" >> $GITHUB_OUTPUT
