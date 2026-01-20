@@ -113,8 +113,8 @@ All modules support:
 
 ## Requirements
 
-- Ansible >= 2.14
-- Python >= 3.9
+- Ansible >= 2.15
+- Python >= 3.11
 - Remnawave Panel >= 2.5.0
 
 ## License
