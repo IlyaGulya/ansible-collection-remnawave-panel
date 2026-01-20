@@ -87,13 +87,11 @@ molecule-docker = "~=2.1.0"
 default = { solve-group = "default" }
 dev = { features = ["dev"], solve-group = "default" }
 
-[tool.pixi.tasks]
+[tool.pixi.feature.dev.tasks]
 generate = "generate"
 generate-dry-run = "generate --dry-run"
 version-check = "version check"
 check-freshness = "bash scripts/check-freshness.sh"
-
-[tool.pixi.feature.dev.tasks]
 lint = "ruff check src/"
 lint-fix = "ruff check --fix src/"
 format = "ruff format src/"
