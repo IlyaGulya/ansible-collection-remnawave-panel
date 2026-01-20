@@ -69,19 +69,21 @@ jobs:
         id: generate
         run: |
           # tox-ansible outputs plain array, GitHub Actions needs {"include": [...]}
-          # Use pixi run which properly handles cwd, then filter out the status line
-          echo "Generating sanity matrix..."
-          pixi run tox-matrix-sanity | tee /tmp/sanity_output.txt
-          # Extract only the JSON array (skip pixi status line)
-          SANITY_ARRAY=$(grep -v '^✨' /tmp/sanity_output.txt)
+          echo "Generating sanity matrix (debug run)..."
+          pixi run -vvv tox-matrix-sanity || true
+
+          echo "Generating sanity matrix (capture)..."
+          SANITY_ARRAY=$(pixi run -q tox-matrix-sanity)
           echo "Sanity array: $SANITY_ARRAY"
           SANITY_MATRIX=$(echo "$SANITY_ARRAY" | jq -c '{include: .}')
           echo "sanity_matrix=$SANITY_MATRIX" >> $GITHUB_OUTPUT
           echo "Sanity matrix: $SANITY_MATRIX"
 
-          echo "Generating unit matrix..."
-          pixi run tox-matrix-unit | tee /tmp/unit_output.txt
-          UNIT_ARRAY=$(grep -v '^✨' /tmp/unit_output.txt)
+          echo "Generating unit matrix (debug run)..."
+          pixi run -vvv tox-matrix-unit || true
+
+          echo "Generating unit matrix (capture)..."
+          UNIT_ARRAY=$(pixi run -q tox-matrix-unit)
           echo "Unit array: $UNIT_ARRAY"
           UNIT_MATRIX=$(echo "$UNIT_ARRAY" | jq -c '{include: .}')
           echo "unit_matrix=$UNIT_MATRIX" >> $GITHUB_OUTPUT
