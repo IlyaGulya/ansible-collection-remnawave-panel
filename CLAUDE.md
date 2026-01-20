@@ -165,3 +165,40 @@ Useful locations:
 
 - **ANSIBLE_COLLECTIONS_PATH**: Configured in `molecule.yml` via `MOLECULE_PROJECT_DIRECTORY` environment variable
 - **molecule_scenario_directory**: Use this variable in playbooks for file paths (e.g., for `.api-token` file location)
+
+## Documentation Style
+
+### Xray Config Format
+
+When writing examples that include Xray configuration (the `config` parameter with inbounds, outbounds, routing), always use JSON syntax (as a YAML object, not a string). This matches how Xray configs are typically written and makes examples more recognizable to users familiar with Xray.
+
+```yaml
+# Good - JSON syntax for entire config
+- name: Create config profile
+  remnawave.panel.config_profile:
+    state: present
+    name: "my-profile"
+    config:
+      {
+        "inbounds": [
+          {
+            "tag": "vless-tcp",
+            "protocol": "vless",
+            "port": 443,
+            "settings": {}
+          }
+        ]
+      }
+
+# Bad - YAML format for config
+- name: Create config profile
+  remnawave.panel.config_profile:
+    state: present
+    name: "my-profile"
+    config:
+      inbounds:
+        - tag: "vless-tcp"
+          protocol: "vless"
+          port: 443
+          settings: {}
+```
