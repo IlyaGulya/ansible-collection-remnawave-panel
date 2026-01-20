@@ -74,9 +74,14 @@ jobs:
           echo "Checking tox-ansible.ini exists..."
           ls -la tox-ansible.ini
 
-          echo "Generating sanity matrix..."
+          echo "Activating pixi dev environment..."
           # Use eval to run in pixi shell context
           eval "$(pixi shell-hook -e dev -m $GITHUB_WORKSPACE/pyproject.toml)"
+          echo "PATH: $PATH"
+          which tox
+          tox --version
+
+          echo "Generating sanity matrix..."
           tox --ansible --gh-matrix --matrix-scope sanity --conf tox-ansible.ini
           SANITY_ARRAY=$(tox --ansible --gh-matrix --matrix-scope sanity --conf tox-ansible.ini)
           echo "Sanity array: $SANITY_ARRAY"
