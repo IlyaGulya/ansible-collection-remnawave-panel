@@ -1,0 +1,64 @@
+---
+# Minimal valid Xray config - must have at least one inbound
+test_config:
+  {
+    "log": {
+      "loglevel": "info"
+    },
+    "inbounds": [
+      {
+        "tag": "TestInbound",
+        "port": 10000,
+        "protocol": "shadowsocks",
+        "settings": {
+          "clients": [],
+          "network": "tcp,udp"
+        },
+        "sniffing": {
+          "enabled": true,
+          "destOverride": ["http", "tls"]
+        }
+      }
+    ],
+    "outbounds": [
+      {
+        "tag": "DIRECT",
+        "protocol": "freedom"
+      }
+    ],
+    "routing": {
+      "rules": []
+    }
+  }
+
+# Updated config for update tests
+test_config_updated:
+  {
+    "log": {
+      "loglevel": "warning"
+    },
+    "inbounds": [
+      {
+        "tag": "UpdatedInbound",
+        "port": 10001,
+        "protocol": "shadowsocks",
+        "settings": {
+          "clients": [],
+          "network": "tcp,udp"
+        },
+        "sniffing": {
+          "enabled": true,
+          "destOverride": ["http", "tls"]
+        }
+      }
+    ],
+    "outbounds": [
+      {
+        "tag": "DIRECT",
+        "protocol": "freedom"
+      }
+    ],
+    "routing": {
+      "rules": []
+    }
+  }

@@ -1,0 +1,205 @@
+---
+# ===========================================
+# Section 1: Config Profile Create Tests
+# ===========================================
+
+- name: Create a config profile
+  remnawave.panel.config_profile:
+    api_url: "{{ api_url }}"
+    api_token: "{{ api_token }}"
+    state: present
+    name: "E2E Test Profile"
+    config: "{{ test_config }}"
+  register: create_profile_result
+
+- name: Assert config profile was created
+  ansible.builtin.assert:
+    that:
+      - create_profile_result.changed
+      - create_profile_result.response is defined
+      - create_profile_result.response.uuid is defined
+    fail_msg: "Config profile creation failed"
+
+- name: Create same config profile again (idempotency test)
+  remnawave.panel.config_profile:
+    api_url: "{{ api_url }}"
+    api_token: "{{ api_token }}"
+    state: present
+    name: "E2E Test Profile"
+    config: "{{ test_config }}"
+  register: idempotent_profile_result
+
+- name: Assert config profile is idempotent
+  ansible.builtin.assert:
+    that:
+      - not idempotent_profile_result.changed
+    fail_msg: "Config profile should be idempotent"
+
+# Extract inbound UUID for node tests
+- name: Set profile and inbound UUIDs
+  ansible.builtin.set_fact:
+    profile_uuid: "{{ create_profile_result.response.uuid }}"
+    inbound_uuid: "{{ create_profile_result.response.inbounds[0].uuid }}"
+
+# ===========================================
+# Section 2: Config Profile Update Tests
+# ===========================================
+
+- name: Update config profile
+  remnawave.panel.config_profile:
+    api_url: "{{ api_url }}"
+    api_token: "{{ api_token }}"
+    state: present
+    name: "E2E Test Profile"
+    config: "{{ test_config_updated }}"
+  register: update_profile_result
+
+- name: Assert config profile was updated
+  ansible.builtin.assert:
+    that:
+      - update_profile_result.changed
+      - update_profile_result.response.config.log.loglevel == 'warning'
+    fail_msg: "Config profile update failed"
+
+- name: Update config profile again (idempotency test)
+  remnawave.panel.config_profile:
+    api_url: "{{ api_url }}"
+    api_token: "{{ api_token }}"
+    state: present
+    name: "E2E Test Profile"
+    config: "{{ test_config_updated }}"
+  register: update_profile_idempotent_result
+
+- name: Assert config profile update is idempotent
+  ansible.builtin.assert:
+    that:
+      - not update_profile_idempotent_result.changed
+    fail_msg: "Config profile update should be idempotent"
+
+# Update inbound UUID after config change
+- name: Update inbound UUID after config change
+  ansible.builtin.set_fact:
+    inbound_uuid: "{{ update_profile_result.response.inbounds[0].uuid }}"
+
+# ===========================================
+# Section 3: Config Profile Check Mode Tests
+# ===========================================
+
+- name: Create config profile in check mode
+  remnawave.panel.config_profile:
+    api_url: "{{ api_url }}"
+    api_token: "{{ api_token }}"
+    state: present
+    name: "Check Mode Profile"
+    config: "{{ test_config }}"
+  check_mode: true
+  register: check_mode_create_profile_result
+
+- name: Assert check mode reports changed for new profile
+  ansible.builtin.assert:
+    that:
+      - check_mode_create_profile_result.changed
+      - check_mode_create_profile_result.diff is defined
+      - check_mode_create_profile_result.diff.before == {}
+    fail_msg: "Check mode should report changed for new profile"
+
+- name: Verify check mode did not create profile
+  remnawave.panel.config_profile:
+    api_url: "{{ api_url }}"
+    api_token: "{{ api_token }}"
+    state: absent
+    name: "Check Mode Profile"
+  register: verify_check_mode_no_create
+
+- name: Assert check mode profile was not created
+  ansible.builtin.assert:
+    that:
+      - not verify_check_mode_no_create.changed
+    fail_msg: "Check mode should not have created the profile"
+
+- name: Update existing profile in check mode
+  remnawave.panel.config_profile:
+    api_url: "{{ api_url }}"
+    api_token: "{{ api_token }}"
+    state: present
+    name: "E2E Test Profile"
+    config: "{{ test_config }}"
+  check_mode: true
+  register: check_mode_update_profile_result
+
+- name: Assert check mode reports changed for update
+  ansible.builtin.assert:
+    that:
+      - check_mode_update_profile_result.changed
+      - check_mode_update_profile_result.diff is defined
+      - check_mode_update_profile_result.diff.before != {}
+      - check_mode_update_profile_result.diff.after != {}
+    fail_msg: "Check mode should report changed for profile update"
+
+- name: Delete existing profile in check mode
+  remnawave.panel.config_profile:
+    api_url: "{{ api_url }}"
+    api_token: "{{ api_token }}"
+    state: absent
+    name: "E2E Test Profile"
+  check_mode: true
+  register: check_mode_delete_profile_result
+
+- name: Assert check mode reports changed for delete
+  ansible.builtin.assert:
+    that:
+      - check_mode_delete_profile_result.changed
+      - check_mode_delete_profile_result.diff is defined
+      - check_mode_delete_profile_result.diff.after == {}
+    fail_msg: "Check mode should report changed for profile delete"
+
+- name: Verify profile still exists after check mode delete
+  remnawave.panel.config_profile:
+    api_url: "{{ api_url }}"
+    api_token: "{{ api_token }}"
+    state: present
+    name: "E2E Test Profile"
+    config: "{{ test_config_updated }}"
+  register: verify_profile_still_exists
+
+- name: Assert profile still exists after check mode delete
+  ansible.builtin.assert:
+    that:
+      - not verify_profile_still_exists.changed
+    fail_msg: "Profile should still exist after check mode delete"
+
+# ===========================================
+# Section 4: Config Profile UUID Lookup Tests
+# ===========================================
+
+- name: Create UUID lookup profile
+  remnawave.panel.config_profile:
+    api_url: "{{ api_url }}"
+    api_token: "{{ api_token }}"
+    state: present
+    name: "UUID Lookup Profile"
+    config: "{{ test_config }}"
+  register: uuid_lookup_profile_result
+
+- name: Assert UUID lookup profile was created
+  ansible.builtin.assert:
+    that:
+      - uuid_lookup_profile_result.changed
+      - uuid_lookup_profile_result.response.uuid is defined
+    fail_msg: "UUID lookup profile creation failed"
+
+- name: Lookup config profile by UUID
+  remnawave.panel.config_profile:
+    api_url: "{{ api_url }}"
+    api_token: "{{ api_token }}"
+    state: present
+    uuid: "{{ uuid_lookup_profile_result.response.uuid }}"
+    name: "UUID Lookup Profile"
+    config: "{{ test_config }}"
+  register: profile_uuid_lookup_result
+
+- name: Assert profile UUID lookup is idempotent
+  ansible.builtin.assert:
+    that:
+      - not profile_uuid_lookup_result.changed
+    fail_msg: "Profile UUID lookup should be idempotent"
