@@ -189,6 +189,48 @@
 # Section 8: Node Check Mode Tests
 # ===========================================
 
+# --- 8.1: Node Create in Check Mode ---
+- name: Create node in check mode (new resource)
+  ilyagulya.remnawave.node:
+    api_url: "{{ api_url }}"
+    api_token: "{{ api_token }}"
+    state: present
+    name: "Check Mode Node"
+    address: "10.0.0.200"
+    port: 443
+    config_profile:
+      active_config_profile_uuid: "{{ profile_uuid }}"
+      active_inbounds:
+        - "{{ inbound_uuid }}"
+  check_mode: true
+  register: check_mode_create_node_result
+
+- name: Assert check mode reports changed for node create
+  ansible.builtin.assert:
+    that:
+      - check_mode_create_node_result.changed
+      - check_mode_create_node_result.diff is defined
+      - check_mode_create_node_result.diff.before == {}
+      - check_mode_create_node_result.response is defined
+      - check_mode_create_node_result.response.name == "Check Mode Node"
+      - check_mode_create_node_result.response.address == "10.0.0.200"
+    fail_msg: "Check mode should report changed and return response for new node"
+
+- name: Verify check mode did not create node
+  ilyagulya.remnawave.node:
+    api_url: "{{ api_url }}"
+    api_token: "{{ api_token }}"
+    state: absent
+    name: "Check Mode Node"
+  register: verify_check_mode_no_create_node
+
+- name: Assert check mode node was not created
+  ansible.builtin.assert:
+    that:
+      - not verify_check_mode_no_create_node.changed
+    fail_msg: "Check mode should not have created the node"
+
+# --- 8.2: Node Update in Check Mode ---
 - name: Update node in check mode
   ilyagulya.remnawave.node:
     api_url: "{{ api_url }}"
@@ -209,7 +251,11 @@
     that:
       - check_mode_update_node_result.changed
       - check_mode_update_node_result.diff is defined
-    fail_msg: "Check mode should report changed for node update"
+      - check_mode_update_node_result.diff.before != {}
+      - check_mode_update_node_result.diff.after != {}
+      - check_mode_update_node_result.response is defined
+      - check_mode_update_node_result.response.address == "10.0.0.99"
+    fail_msg: "Check mode should report changed and return response for node update"
 
 - name: Delete node in check mode
   ilyagulya.remnawave.node:

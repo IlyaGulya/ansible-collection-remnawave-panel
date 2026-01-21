@@ -103,6 +103,13 @@
       - check_mode_create_profile_result.diff.before == {}
     fail_msg: "Check mode should report changed for new profile"
 
+- name: Assert check mode returns response for new profile
+  ansible.builtin.assert:
+    that:
+      - check_mode_create_profile_result.response is defined
+      - check_mode_create_profile_result.response.name == "Check Mode Profile"
+    fail_msg: "Check mode should return response with predicted state"
+
 - name: Verify check mode did not create profile
   ilyagulya.remnawave.config_profile:
     api_url: "{{ api_url }}"
@@ -135,6 +142,13 @@
       - check_mode_update_profile_result.diff.before != {}
       - check_mode_update_profile_result.diff.after != {}
     fail_msg: "Check mode should report changed for profile update"
+
+- name: Assert check mode returns response for profile update
+  ansible.builtin.assert:
+    that:
+      - check_mode_update_profile_result.response is defined
+      - check_mode_update_profile_result.response.name == "E2E Test Profile"
+    fail_msg: "Check mode should return response with predicted state for update"
 
 - name: Delete existing profile in check mode
   ilyagulya.remnawave.config_profile:

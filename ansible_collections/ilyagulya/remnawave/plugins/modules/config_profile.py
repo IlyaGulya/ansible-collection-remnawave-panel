@@ -120,9 +120,9 @@ changed:
     type: bool
     returned: always
 response:
-    description: The API response containing the resource data.
+    description: The API response containing the resource data. In check mode, contains the predicted state.
     type: dict
-    returned: when resource is created or updated
+    returned: when resource is created, updated, or would be changed in check mode
     sample:
         uuid: "550e8400-e29b-41d4-a716-446655440000"
         name: "example"
@@ -275,6 +275,7 @@ def run_module():
                 result["changed"] = True
                 result["msg"] = "Config Profile would be created"
                 result["diff"] = {"before": {}, "after": camel_to_snake_dict(payload)}
+                result["response"] = camel_to_snake_dict(payload)
             else:
                 response = client.create("/api/config-profiles", payload)
                 result["changed"] = True
@@ -291,6 +292,7 @@ def run_module():
                         "before": camel_to_snake_dict(existing),
                         "after": camel_to_snake_dict({**existing, **payload}),
                     }
+                    result["response"] = camel_to_snake_dict({**existing, **payload})
                 else:
                     # Add ID to payload for update
                     payload["uuid"] = resource_id
