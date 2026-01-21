@@ -41,7 +41,7 @@ def read_api_version() -> str:
 
 def read_galaxy_version() -> str:
     """Read version from galaxy.yml."""
-    galaxy_path = get_project_root() / "ansible_collections" / "remnawave" / "panel" / "galaxy.yml"
+    galaxy_path = get_project_root() / "ansible_collections" / "ilyagulya" / "remnawave" / "galaxy.yml"
     with open(galaxy_path) as f:
         data = cast(dict[str, Any], yaml.safe_load(f))
     return str(data.get("version", "unknown"))
@@ -81,7 +81,7 @@ def read_readme_requirements_version() -> str:
 
 def read_version_info() -> dict[str, Any] | None:
     """Read version_info.yml if it exists."""
-    version_info_path = get_project_root() / "ansible_collections" / "remnawave" / "panel" / "meta" / "version_info.yml"
+    version_info_path = get_project_root() / "ansible_collections" / "ilyagulya" / "remnawave" / "meta" / "version_info.yml"
     if not version_info_path.exists():
         return None
     with open(version_info_path) as f:
@@ -187,7 +187,7 @@ def sync_versions() -> None:
     print()
 
     # Update galaxy.yml
-    galaxy_path = get_project_root() / "ansible_collections" / "remnawave" / "panel" / "galaxy.yml"
+    galaxy_path = get_project_root() / "ansible_collections" / "ilyagulya" / "remnawave" / "galaxy.yml"
     with open(galaxy_path) as f:
         galaxy_data = yaml.safe_load(f)
     if galaxy_data.get("version") != pyproject_version:
