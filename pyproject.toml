@@ -97,17 +97,28 @@ lint-fix = "ruff check --fix src/"
 format = "ruff format src/"
 format-check = "ruff format --check src/"
 typecheck = "mypy src/"
-ansible-lint = { cmd = "ansible-lint", cwd = "ansible_collections/remnawave/panel", env = { ANSIBLE_COLLECTIONS_PATH = "../../.." } }
-molecule-test = { cmd = "molecule test -s e2e", cwd = "ansible_collections/remnawave/panel" }
-molecule-create = { cmd = "molecule create -s e2e", cwd = "ansible_collections/remnawave/panel" }
-molecule-converge = { cmd = "molecule converge -s e2e", cwd = "ansible_collections/remnawave/panel" }
-molecule-verify = { cmd = "molecule verify -s e2e", cwd = "ansible_collections/remnawave/panel" }
-molecule-destroy = { cmd = "molecule destroy -s e2e", cwd = "ansible_collections/remnawave/panel" }
+ansible-lint = { cmd = "ansible-lint", cwd = "ansible_collections/ilyagulya/remnawave", env = { ANSIBLE_COLLECTIONS_PATH = "../../.." } }
+molecule-test = { cmd = "molecule test -s e2e", cwd = "ansible_collections/ilyagulya/remnawave" }
+molecule-create = { cmd = "molecule create -s e2e", cwd = "ansible_collections/ilyagulya/remnawave" }
+molecule-converge = { cmd = "molecule converge -s e2e", cwd = "ansible_collections/ilyagulya/remnawave" }
+molecule-verify = { cmd = "molecule verify -s e2e", cwd = "ansible_collections/ilyagulya/remnawave" }
+molecule-destroy = { cmd = "molecule destroy -s e2e", cwd = "ansible_collections/ilyagulya/remnawave" }
 check = { depends-on = ["lint", "typecheck", "version-check"] }
 
 # tox-ansible tasks
-tox-list = { cmd = "tox list --ansible --conf tox-ansible.ini", cwd = "ansible_collections/remnawave/panel" }
-tox-matrix-sanity = { cmd = "tox --ansible --gh-matrix --matrix-scope sanity --conf tox-ansible.ini", cwd = "ansible_collections/remnawave/panel" }
-tox-matrix-unit = { cmd = "tox --ansible --gh-matrix --matrix-scope unit --conf tox-ansible.ini", cwd = "ansible_collections/remnawave/panel" }
-tox-sanity = { cmd = "tox --ansible -e {{ env }} --conf tox-ansible.ini", cwd = "ansible_collections/remnawave/panel", args = ["env"] }
-tox-unit = { cmd = "tox --ansible -e {{ env }} --conf tox-ansible.ini", cwd = "ansible_collections/remnawave/panel", args = ["env"] }
+tox-list = { cmd = "tox list --ansible --conf tox-ansible.ini", cwd = "ansible_collections/ilyagulya/remnawave" }
+tox-matrix-sanity = { cmd = "tox --ansible --gh-matrix --matrix-scope sanity --conf tox-ansible.ini", cwd = "ansible_collections/ilyagulya/remnawave" }
+tox-matrix-unit = { cmd = "tox --ansible --gh-matrix --matrix-scope unit --conf tox-ansible.ini", cwd = "ansible_collections/ilyagulya/remnawave" }
+tox-sanity = { cmd = "tox --ansible -e {{ env }} --conf tox-ansible.ini", cwd = "ansible_collections/ilyagulya/remnawave", args = ["env"] }
+tox-unit = { cmd = "tox --ansible -e {{ env }} --conf tox-ansible.ini", cwd = "ansible_collections/ilyagulya/remnawave", args = ["env"] }
+tox-sanity-all = { cmd = "tox --ansible --conf tox-ansible.ini -p auto -- --sanity", cwd = "ansible_collections/ilyagulya/remnawave" }
+tox-unit-all = { cmd = "tox --ansible --conf tox-ansible.ini -p auto -- --unit", cwd = "ansible_collections/ilyagulya/remnawave" }
+tox-all = { cmd = "tox --ansible --conf tox-ansible.ini -p auto", cwd = "ansible_collections/ilyagulya/remnawave" }
+
+# Collection build/install/publish tasks
+collection-build = { cmd = "ansible-galaxy collection build --force", cwd = "ansible_collections/ilyagulya/remnawave" }
+collection-install = { cmd = "bash -c 'TARBALL=$(ls ilyagulya-remnawave-*.tar.gz) && ansible-galaxy collection install \"$TARBALL\" -p /tmp/test-collections --force'", cwd = "ansible_collections/ilyagulya/remnawave" }
+collection-verify = { cmd = "bash -c 'ANSIBLE_COLLECTIONS_PATH=/tmp/test-collections ansible-galaxy collection list | grep ilyagulya.remnawave'" }
+collection-doc-test = { cmd = "bash -c 'ANSIBLE_COLLECTIONS_PATH=/tmp/test-collections ansible-doc ilyagulya.remnawave.node'" }
+collection-test = { depends-on = ["collection-build", "collection-install", "collection-verify", "collection-doc-test"] }
+collection-publish = { cmd = "bash -c 'TARBALL=$(ls ilyagulya-remnawave-*.tar.gz) && ansible-galaxy collection publish \"$TARBALL\" --api-key=\"$GALAXY_API_KEY\"'", cwd = "ansible_collections/ilyagulya/remnawave" }

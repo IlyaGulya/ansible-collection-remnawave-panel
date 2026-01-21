@@ -148,7 +148,7 @@ jobs:
       - name: Collect container logs on failure
         if: failure()
         run: |
-          cd ansible_collections/remnawave/panel/extensions/molecule/e2e
+          cd ansible_collections/ilyagulya/remnawave/extensions/molecule/e2e
           docker compose logs > docker-logs.txt 2>&1 || true
           echo "=== Docker Compose Logs ==="
           cat docker-logs.txt || true
@@ -158,11 +158,37 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: e2e-docker-logs
-          path: ansible_collections/remnawave/panel/extensions/molecule/e2e/docker-logs.txt
+          path: ansible_collections/ilyagulya/remnawave/extensions/molecule/e2e/docker-logs.txt
           retention-days: 7
 
       - name: Cleanup Docker containers
         if: always()
         run: |
-          cd ansible_collections/remnawave/panel/extensions/molecule/e2e
+          cd ansible_collections/ilyagulya/remnawave/extensions/molecule/e2e
           docker compose down -v --remove-orphans 2>/dev/null || true
+
+  build-install-test:
+    name: Build & Install Test
+    needs: validate-generator
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pixi
+        uses: prefix-dev/setup-pixi@v0.9.3
+        with:
+          cache: true
+          environments: dev
+
+      - name: Build collection
+        run: pixi run collection-build
+
+      - name: Install collection from tarball
+        run: pixi run collection-install
+
+      - name: Verify collection installation
+        run: pixi run collection-verify
+
+      - name: Test module documentation
+        run: pixi run collection-doc-test

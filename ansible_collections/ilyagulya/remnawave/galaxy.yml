@@ -1,0 +1,28 @@
+namespace: ilyagulya
+name: remnawave
+version: 0.1.0
+readme: README.md
+authors:
+  - Ilya Gulya
+description: Ansible collection for managing Remnawave panel resources
+license:
+  - MIT
+dependencies: {}
+repository: https://github.com/IlyaGulya/ansible-collection-remnawave-panel
+documentation: https://github.com/IlyaGulya/ansible-collection-remnawave-panel
+tags:
+  - remnawave
+  - vpn
+  - panel
+  - infrastructure
+
+build_ignore:
+  - tests/output
+  - extensions
+  - tox-ansible.ini
+  - test-requirements.txt
+  - .tox
+  - .mypy_cache
+  - __pycache__
+  - "*.pyc"
+  - "*.pyo"

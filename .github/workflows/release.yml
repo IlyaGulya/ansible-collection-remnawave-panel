@@ -1,0 +1,157 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (skip publish)'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pixi
+        uses: prefix-dev/setup-pixi@v0.9.3
+        with:
+          cache: true
+          environments: dev
+
+      - name: Check version sync
+        run: pixi run version-check
+
+      - name: Check freshness
+        run: pixi run check-freshness
+
+      - name: Extract version from galaxy.yml
+        id: version
+        run: |
+          VERSION=$(grep '^version:' ansible_collections/ilyagulya/remnawave/galaxy.yml | awk '{print $2}')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Galaxy version: $VERSION"
+
+      - name: Verify tag matches version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          TAG_VERSION="${GITHUB_REF#refs/tags/v}"
+          GALAXY_VERSION="${{ steps.version.outputs.version }}"
+          if [ "$TAG_VERSION" != "$GALAXY_VERSION" ]; then
+            echo "Tag version ($TAG_VERSION) does not match galaxy.yml version ($GALAXY_VERSION)"
+            exit 1
+          fi
+          echo "Tag version matches galaxy.yml version: $GALAXY_VERSION"
+
+  build:
+    name: Build Collection
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pixi
+        uses: prefix-dev/setup-pixi@v0.9.3
+        with:
+          cache: true
+          environments: dev
+
+      - name: Build collection
+        run: pixi run collection-build
+
+      - name: Upload collection tarball
+        uses: actions/upload-artifact@v4
+        with:
+          name: collection-tarball
+          path: ansible_collections/ilyagulya/remnawave/ilyagulya-remnawave-*.tar.gz
+          retention-days: 30
+
+  install-test:
+    name: Install Test (Python ${{ matrix.python }})
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.12']
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pixi
+        uses: prefix-dev/setup-pixi@v0.9.3
+        with:
+          cache: true
+          environments: dev
+
+      - name: Download collection tarball
+        uses: actions/download-artifact@v4
+        with:
+          name: collection-tarball
+          path: ansible_collections/ilyagulya/remnawave/
+
+      - name: Install collection from tarball
+        run: pixi run collection-install
+
+      - name: Verify collection installation
+        run: pixi run collection-verify
+
+      - name: Test module documentation
+        run: pixi run collection-doc-test
+
+  publish:
+    name: Publish to Galaxy
+    needs: [validate, build, install-test]
+    if: startsWith(github.ref, 'refs/tags/v') && !inputs.dry_run
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pixi
+        uses: prefix-dev/setup-pixi@v0.9.3
+        with:
+          cache: true
+          environments: dev
+
+      - name: Download collection tarball
+        uses: actions/download-artifact@v4
+        with:
+          name: collection-tarball
+          path: ansible_collections/ilyagulya/remnawave/
+
+      - name: Publish to Ansible Galaxy
+        run: pixi run collection-publish
+        env:
+          GALAXY_API_KEY: ${{ secrets.GALAXY_API_KEY }}
+
+  github-release:
+    name: Create GitHub Release
+    needs: [validate, build, install-test, publish]
+    if: startsWith(github.ref, 'refs/tags/v') && !inputs.dry_run
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download collection tarball
+        uses: actions/download-artifact@v4
+        with:
+          name: collection-tarball
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ilyagulya-remnawave-*.tar.gz
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(needs.validate.outputs.version, 'rc') || contains(needs.validate.outputs.version, 'beta') || contains(needs.validate.outputs.version, 'alpha') }}

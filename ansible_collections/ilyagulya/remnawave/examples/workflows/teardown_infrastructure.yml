@@ -19,15 +19,15 @@
 
     - name: Delete node
       ilyagulya.remnawave.node:
-        api_url: "{{ '{{' }} remnawave_api_url {{ '}}' }}"
-        api_token: "{{ '{{' }} remnawave_api_token {{ '}}' }}"
+        api_url: "{{ remnawave_api_url }}"
+        api_token: "{{ remnawave_api_token }}"
         state: absent
-        name: "{{ '{{' }} node_name {{ '}}' }}"
+        name: "{{ node_name }}"
       register: node_result
 
     - name: Display node deletion result
       ansible.builtin.debug:
-        msg: "Node '{{ '{{' }} node_name {{ '}}' }}' deletion: {{ '{{' }} 'deleted' if node_result.changed else 'already absent' {{ '}}' }}"
+        msg: "Node '{{ node_name }}' deletion: {{ 'deleted' if node_result.changed else 'already absent' }}"
 
     # =========================================
     # Step 2: Delete Config Profile
@@ -35,15 +35,15 @@
 
     - name: Delete config profile
       ilyagulya.remnawave.config_profile:
-        api_url: "{{ '{{' }} remnawave_api_url {{ '}}' }}"
-        api_token: "{{ '{{' }} remnawave_api_token {{ '}}' }}"
+        api_url: "{{ remnawave_api_url }}"
+        api_token: "{{ remnawave_api_token }}"
         state: absent
-        name: "{{ '{{' }} config_profile_name {{ '}}' }}"
+        name: "{{ config_profile_name }}"
       register: profile_result
 
     - name: Display profile deletion result
       ansible.builtin.debug:
-        msg: "Profile '{{ '{{' }} config_profile_name {{ '}}' }}' deletion: {{ '{{' }} 'deleted' if profile_result.changed else 'already absent' {{ '}}' }}"
+        msg: "Profile '{{ config_profile_name }}' deletion: {{ 'deleted' if profile_result.changed else 'already absent' }}"
 
     # =========================================
     # Summary
@@ -53,5 +53,5 @@
       ansible.builtin.debug:
         msg:
           - "Infrastructure teardown complete!"
-          - "Node deleted: {{ '{{' }} node_result.changed {{ '}}' }}"
-          - "Config profile deleted: {{ '{{' }} profile_result.changed {{ '}}' }}"
+          - "Node deleted: {{ node_result.changed }}"
+          - "Config profile deleted: {{ profile_result.changed }}"

@@ -18,22 +18,22 @@
 
     - name: Create config profile
       ilyagulya.remnawave.config_profile:
-        api_url: "{{ '{{' }} remnawave_api_url {{ '}}' }}"
-        api_token: "{{ '{{' }} remnawave_api_token {{ '}}' }}"
+        api_url: "{{ remnawave_api_url }}"
+        api_token: "{{ remnawave_api_token }}"
         state: present
-        name: "{{ '{{' }} config_profile_name {{ '}}' }}"
-        config: "{{ '{{' }} xray_config {{ '}}' }}"
+        name: "{{ config_profile_name }}"
+        config: "{{ xray_config }}"
       register: profile_result
 
     - name: Display config profile result
       ansible.builtin.debug:
-        msg: "Profile '{{ '{{' }} profile_result.response.name {{ '}}' }}' (UUID: {{ '{{' }} profile_result.response.uuid {{ '}}' }})"
+        msg: "Profile '{{ profile_result.response.name }}' (UUID: {{ profile_result.response.uuid }})"
 
     # Extract inbound UUID for node configuration
     - name: Set profile and inbound facts
       ansible.builtin.set_fact:
-        profile_uuid: "{{ '{{' }} profile_result.response.uuid {{ '}}' }}"
-        inbound_uuid: "{{ '{{' }} profile_result.response.inbounds[0].uuid {{ '}}' }}"
+        profile_uuid: "{{ profile_result.response.uuid }}"
+        inbound_uuid: "{{ profile_result.response.inbounds[0].uuid }}"
 
     # =========================================
     # Step 2: Create Nodes
@@ -41,21 +41,21 @@
 
     - name: Create node
       ilyagulya.remnawave.node:
-        api_url: "{{ '{{' }} remnawave_api_url {{ '}}' }}"
-        api_token: "{{ '{{' }} remnawave_api_token {{ '}}' }}"
+        api_url: "{{ remnawave_api_url }}"
+        api_token: "{{ remnawave_api_token }}"
         state: present
-        name: "{{ '{{' }} node_name {{ '}}' }}"
-        address: "{{ '{{' }} node_address {{ '}}' }}"
-        port: "{{ '{{' }} node_port {{ '}}' }}"
+        name: "{{ node_name }}"
+        address: "{{ node_address }}"
+        port: "{{ node_port }}"
         config_profile:
-          active_config_profile_uuid: "{{ '{{' }} profile_uuid {{ '}}' }}"
+          active_config_profile_uuid: "{{ profile_uuid }}"
           active_inbounds:
-            - "{{ '{{' }} inbound_uuid {{ '}}' }}"
+            - "{{ inbound_uuid }}"
       register: node_result
 
     - name: Display node result
       ansible.builtin.debug:
-        msg: "Node '{{ '{{' }} node_result.response.name {{ '}}' }}' at {{ '{{' }} node_result.response.address {{ '}}' }}"
+        msg: "Node '{{ node_result.response.name }}' at {{ node_result.response.address }}"
 
     # =========================================
     # Summary
@@ -65,5 +65,5 @@
       ansible.builtin.debug:
         msg:
           - "Infrastructure setup complete!"
-          - "Config Profile: {{ '{{' }} config_profile_name {{ '}}' }} ({{ '{{' }} profile_uuid {{ '}}' }})"
-          - "Node: {{ '{{' }} node_name {{ '}}' }} at {{ '{{' }} node_address {{ '}}' }}:{{ '{{' }} node_port {{ '}}' }}"
+          - "Config Profile: {{ config_profile_name }} ({{ profile_uuid }})"
+          - "Node: {{ node_name }} at {{ node_address }}:{{ node_port }}"

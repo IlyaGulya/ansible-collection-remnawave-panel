@@ -20,21 +20,21 @@
 
     - name: Delete all nodes
       ilyagulya.remnawave.node:
-        api_url: "{{ '{{' }} remnawave_api_url {{ '}}' }}"
-        api_token: "{{ '{{' }} remnawave_api_token {{ '}}' }}"
+        api_url: "{{ remnawave_api_url }}"
+        api_token: "{{ remnawave_api_token }}"
         state: absent
-        name: "{{ '{{' }} item.name {{ '}}' }}"
-      loop: "{{ '{{' }} nodes {{ '}}' }}"
+        name: "{{ item.name }}"
+      loop: "{{ nodes }}"
       loop_control:
-        label: "{{ '{{' }} item.name {{ '}}' }}"
+        label: "{{ item.name }}"
       register: nodes_result
 
     - name: Display node deletion status
       ansible.builtin.debug:
-        msg: "{{ '{{' }} item.item.name {{ '}}' }}: {{ '{{' }} 'deleted' if item.changed else 'did not exist' {{ '}}' }}"
-      loop: "{{ '{{' }} nodes_result.results {{ '}}' }}"
+        msg: "{{ item.item.name }}: {{ 'deleted' if item.changed else 'did not exist' }}"
+      loop: "{{ nodes_result.results }}"
       loop_control:
-        label: "{{ '{{' }} item.item.name {{ '}}' }}"
+        label: "{{ item.item.name }}"
 
     # =========================================
     # Step 2: Delete All Config Profiles
@@ -42,21 +42,21 @@
 
     - name: Delete all config profiles
       ilyagulya.remnawave.config_profile:
-        api_url: "{{ '{{' }} remnawave_api_url {{ '}}' }}"
-        api_token: "{{ '{{' }} remnawave_api_token {{ '}}' }}"
+        api_url: "{{ remnawave_api_url }}"
+        api_token: "{{ remnawave_api_token }}"
         state: absent
-        name: "{{ '{{' }} item.name {{ '}}' }}"
-      loop: "{{ '{{' }} config_profiles {{ '}}' }}"
+        name: "{{ item.name }}"
+      loop: "{{ config_profiles }}"
       loop_control:
-        label: "{{ '{{' }} item.name {{ '}}' }}"
+        label: "{{ item.name }}"
       register: profiles_result
 
     - name: Display profile deletion status
       ansible.builtin.debug:
-        msg: "{{ '{{' }} item.item.name {{ '}}' }}: {{ '{{' }} 'deleted' if item.changed else 'did not exist' {{ '}}' }}"
-      loop: "{{ '{{' }} profiles_result.results {{ '}}' }}"
+        msg: "{{ item.item.name }}: {{ 'deleted' if item.changed else 'did not exist' }}"
+      loop: "{{ profiles_result.results }}"
       loop_control:
-        label: "{{ '{{' }} item.item.name {{ '}}' }}"
+        label: "{{ item.item.name }}"
 
     # =========================================
     # Summary
@@ -64,8 +64,8 @@
 
     - name: Calculate deletion statistics
       ansible.builtin.set_fact:
-        nodes_deleted: "{{ '{{' }} nodes_result.results | selectattr('changed', 'true') | list | length {{ '}}' }}"
-        profiles_deleted: "{{ '{{' }} profiles_result.results | selectattr('changed', 'true') | list | length {{ '}}' }}"
+        nodes_deleted: "{{ nodes_result.results | selectattr('changed', 'true') | list | length }}"
+        profiles_deleted: "{{ profiles_result.results | selectattr('changed', 'true') | list | length }}"
 
     - name: Display teardown summary
       ansible.builtin.debug:
@@ -74,7 +74,7 @@
           - "Production Infrastructure Teardown Complete"
           - "============================================"
           - ""
-          - "Nodes deleted: {{ '{{' }} nodes_deleted {{ '}}' }} / {{ '{{' }} nodes | length {{ '}}' }}"
-          - "Profiles deleted: {{ '{{' }} profiles_deleted {{ '}}' }} / {{ '{{' }} config_profiles | length {{ '}}' }}"
+          - "Nodes deleted: {{ nodes_deleted }} / {{ nodes | length }}"
+          - "Profiles deleted: {{ profiles_deleted }} / {{ config_profiles | length }}"
           - ""
           - "All infrastructure has been removed."

@@ -2,6 +2,7 @@
 """CLI entry point for the Remnawave Ansible Module Generator."""
 
 import argparse
+import shutil
 import sys
 from pathlib import Path
 
@@ -65,7 +66,7 @@ def main() -> int:
         # List example files that would be generated
         examples_config = config.get("examples", {})
         if examples_config.get("enabled", True):
-            examples_dir = config.get("examples", {}).get("output_dir", "ansible_collections/remnawave/panel/examples")
+            examples_dir = config.get("examples", {}).get("output_dir", "ansible_collections/ilyagulya/remnawave/examples")
             example_files = list_example_files(resources)
             print(f"\nExample files to generate in {examples_dir}/:")
             for example_file in example_files:
@@ -122,7 +123,7 @@ def main() -> int:
     # Generate example playbooks
     examples_config = config.get("examples", {})
     if examples_config.get("enabled", True):
-        examples_dir = project_root / examples_config.get("output_dir", "ansible_collections/remnawave/panel/examples")
+        examples_dir = project_root / examples_config.get("output_dir", "ansible_collections/ilyagulya/remnawave/examples")
         print(f"\nGenerating example playbooks in {examples_dir}...")
         try:
             generated_examples = render_examples(env, resources, examples_dir, spec, config)
@@ -133,7 +134,7 @@ def main() -> int:
             return 1
 
     # Generate version_info.yml manifest
-    meta_dir = project_root / "ansible_collections" / "remnawave" / "panel" / "meta"
+    meta_dir = project_root / "ansible_collections" / "ilyagulya" / "remnawave" / "meta"
     meta_dir.mkdir(parents=True, exist_ok=True)
     version_info_path = meta_dir / "version_info.yml"
     version_info = {
@@ -146,6 +147,13 @@ def main() -> int:
         f.write("# Auto-generated - DO NOT EDIT\n")
         yaml.dump(version_info, f, default_flow_style=False, sort_keys=False)
     print(f"  -> Generated {version_info_path}")
+
+    # Copy LICENSE file to collection
+    license_src = project_root / "LICENSE"
+    license_dst = project_root / "ansible_collections" / "ilyagulya" / "remnawave" / "LICENSE"
+    if license_src.exists():
+        shutil.copy(license_src, license_dst)
+        print(f"  -> Copied {license_dst}")
 
     print("\nGeneration complete!")
     return 0

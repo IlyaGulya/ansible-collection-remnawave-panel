@@ -18,31 +18,31 @@
 
     - name: Preview config profile creation (check mode)
       ilyagulya.remnawave.config_profile:
-        api_url: "{{ '{{' }} remnawave_api_url {{ '}}' }}"
-        api_token: "{{ '{{' }} remnawave_api_token {{ '}}' }}"
+        api_url: "{{ remnawave_api_url }}"
+        api_token: "{{ remnawave_api_token }}"
         state: present
         name: "Check Mode Test Profile"
-        config: "{{ '{{' }} xray_config {{ '}}' }}"
+        config: "{{ xray_config }}"
       check_mode: true
       register: profile_check
 
     - name: Display check mode result for profile
       ansible.builtin.debug:
         msg:
-          - "Would change: {{ '{{' }} profile_check.changed {{ '}}' }}"
-          - "Diff before: {{ '{{' }} profile_check.diff.before | default({}) {{ '}}' }}"
-          - "Diff after: {{ '{{' }} profile_check.diff.after | default({}) {{ '}}' }}"
+          - "Would change: {{ profile_check.changed }}"
+          - "Diff before: {{ profile_check.diff.before | default({}) }}"
+          - "Diff after: {{ profile_check.diff.after | default({}) }}"
 
     - name: Preview node creation (check mode)
       ilyagulya.remnawave.node:
-        api_url: "{{ '{{' }} remnawave_api_url {{ '}}' }}"
-        api_token: "{{ '{{' }} remnawave_api_token {{ '}}' }}"
+        api_url: "{{ remnawave_api_url }}"
+        api_token: "{{ remnawave_api_token }}"
         state: present
         name: "Check Mode Test Node"
         address: "10.0.0.100"
         port: 443
         config_profile:
-          active_config_profile: "{{ '{{' }} config_profile_name {{ '}}' }}"
+          active_config_profile: "{{ config_profile_name }}"
           active_inbound_tags:
             - "MainInbound"
       check_mode: true
@@ -51,9 +51,9 @@
     - name: Display check mode result for node
       ansible.builtin.debug:
         msg:
-          - "Would change: {{ '{{' }} node_check.changed {{ '}}' }}"
-          - "Diff before: {{ '{{' }} node_check.diff.before | default({}) {{ '}}' }}"
-          - "Diff after: {{ '{{' }} node_check.diff.after | default({}) {{ '}}' }}"
+          - "Would change: {{ node_check.changed }}"
+          - "Diff before: {{ node_check.diff.before | default({}) }}"
+          - "Diff after: {{ node_check.diff.after | default({}) }}"
 
     # =========================================
     # Check Mode with Diff

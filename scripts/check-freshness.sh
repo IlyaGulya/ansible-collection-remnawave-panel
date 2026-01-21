@@ -4,7 +4,7 @@ set -e
 echo "Running generator..."
 pixi run generate
 
-COLLECTION_PATH="ansible_collections/remnawave/panel"
+COLLECTION_PATH="ansible_collections/ilyagulya/remnawave"
 
 if [ -n "$(git status --porcelain "$COLLECTION_PATH/")" ]; then
     echo "❌ Generated code is out of sync with generator/spec"

@@ -19,14 +19,14 @@ Ansible collection for managing [Remnawave](https://github.com/remnawave/panel) 
 ## Installation
 
 ```bash
-ansible-galaxy collection install remnawave.panel
+ansible-galaxy collection install ilyagulya.remnawave
 ```
 
 Or add to `requirements.yml`:
 
 ```yaml
 collections:
-  - name: remnawave.panel
+  - name: ilyagulya.remnawave
     version: ">=0.1.0"
 ```
 
@@ -43,7 +43,7 @@ collections:
    - hosts: localhost
      tasks:
        - name: Create config profile
-         remnawave.panel.config_profile:
+         ilyagulya.remnawave.config_profile:
            state: present
            name: "my-profile"
            config:
@@ -68,8 +68,8 @@ collections:
 
 | Module | Description |
 |--------|-------------|
-| `remnawave.panel.node` | Manage panel nodes |
-| `remnawave.panel.config_profile` | Manage configuration profiles |
+| `ilyagulya.remnawave.node` | Manage panel nodes |
+| `ilyagulya.remnawave.config_profile` | Manage configuration profiles |
 
 ## Authentication
 
@@ -88,7 +88,7 @@ Create an API token in the Remnawave panel under Settings > API Tokens.
 
 ```yaml
 - name: Create a config profile
-  remnawave.panel.config_profile:
+  ilyagulya.remnawave.config_profile:
     api_url: "https://panel.example.com"
     api_token: "{{ api_token }}"
     state: present
@@ -106,7 +106,7 @@ Create an API token in the Remnawave panel under Settings > API Tokens.
       }
 
 - name: Delete a config profile
-  remnawave.panel.config_profile:
+  ilyagulya.remnawave.config_profile:
     api_url: "https://panel.example.com"
     api_token: "{{ api_token }}"
     state: absent
@@ -117,7 +117,7 @@ Create an API token in the Remnawave panel under Settings > API Tokens.
 
 ```yaml
 - name: Create a node (using name-based lookup)
-  remnawave.panel.node:
+  ilyagulya.remnawave.node:
     api_url: "https://panel.example.com"
     api_token: "{{ api_token }}"
     state: present
@@ -130,7 +130,7 @@ Create an API token in the Remnawave panel under Settings > API Tokens.
         - "vless-tcp"  # Reference by tag
 
 - name: Delete a node
-  remnawave.panel.node:
+  ilyagulya.remnawave.node:
     api_url: "https://panel.example.com"
     api_token: "{{ api_token }}"
     state: absent
@@ -141,7 +141,7 @@ Create an API token in the Remnawave panel under Settings > API Tokens.
 
 ```yaml
 - name: Create node using environment credentials
-  remnawave.panel.node:
+  ilyagulya.remnawave.node:
     state: present
     name: "edge-server-1"
     address: "192.168.1.100"
@@ -160,7 +160,7 @@ The `node` module supports traffic tracking parameters:
 
 ```yaml
 - name: Create node with traffic limits
-  remnawave.panel.node:
+  ilyagulya.remnawave.node:
     state: present
     name: "edge-server-1"
     address: "192.168.1.100"
@@ -174,7 +174,7 @@ The `node` module supports traffic tracking parameters:
     traffic_reset_day: 1                # Reset on 1st of month
 ```
 
-For more examples including workflows, multi-region deployments, and production patterns, see the [examples directory](ansible_collections/remnawave/panel/examples/).
+For more examples including workflows, multi-region deployments, and production patterns, see the [examples directory](ansible_collections/ilyagulya/remnawave/examples/).
 
 ## Common Parameters
 

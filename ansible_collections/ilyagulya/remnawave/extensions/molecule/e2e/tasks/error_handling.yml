@@ -1,0 +1,171 @@
+---
+# ===========================================
+# Section 10: Error Handling Tests
+# ===========================================
+
+- name: Attempt to create node with name too short
+  ilyagulya.remnawave.node:
+    api_url: "{{ api_url }}"
+    api_token: "{{ api_token }}"
+    state: present
+    name: "AB"
+    address: "10.0.0.200"
+    config_profile:
+      active_config_profile_uuid: "{{ profile_uuid }}"
+      active_inbounds:
+        - "{{ inbound_uuid }}"
+  ignore_errors: true
+  register: short_name_error_result
+
+- name: Assert short name error
+  ansible.builtin.assert:
+    that:
+      - short_name_error_result.failed
+    fail_msg: "Node creation with short name should fail"
+
+# ===========================================
+# Section 10.5: Config Profile Name Resolution Tests
+# ===========================================
+
+- name: Create node using config profile NAME (not UUID)
+  ilyagulya.remnawave.node:
+    api_url: "{{ api_url }}"
+    api_token: "{{ api_token }}"
+    state: present
+    name: "Name Lookup Test Node"
+    address: "10.0.0.200"
+    port: 443
+    config_profile:
+      active_config_profile: "E2E Test Profile"
+      active_inbounds:
+        - "{{ inbound_uuid }}"
+  register: name_lookup_result
+
+- name: Assert node with profile name was created
+  ansible.builtin.assert:
+    that:
+      - name_lookup_result.changed
+      - name_lookup_result.response.uuid is defined
+    fail_msg: "Node creation with profile name lookup failed"
+
+- name: Create same node again (idempotency with name lookup)
+  ilyagulya.remnawave.node:
+    api_url: "{{ api_url }}"
+    api_token: "{{ api_token }}"
+    state: present
+    name: "Name Lookup Test Node"
+    address: "10.0.0.200"
+    port: 443
+    config_profile:
+      active_config_profile: "E2E Test Profile"
+      active_inbounds:
+        - "{{ inbound_uuid }}"
+  register: name_lookup_idempotent
+
+- name: Assert name lookup is idempotent
+  ansible.builtin.assert:
+    that:
+      - not name_lookup_idempotent.changed
+    fail_msg: "Node with profile name lookup should be idempotent"
+
+- name: Test error when config profile name not found
+  ilyagulya.remnawave.node:
+    api_url: "{{ api_url }}"
+    api_token: "{{ api_token }}"
+    state: present
+    name: "Nonexistent Profile Node"
+    address: "10.0.0.201"
+    port: 443
+    config_profile:
+      active_config_profile: "Nonexistent Profile Name"
+      active_inbounds: []
+  ignore_errors: true
+  register: not_found_result
+
+- name: Assert not found error
+  ansible.builtin.assert:
+    that:
+      - not_found_result.failed
+      - "'not found' in not_found_result.msg"
+    fail_msg: "Should fail when config profile name is not found"
+
+- name: Cleanup name lookup test node
+  ilyagulya.remnawave.node:
+    api_url: "{{ api_url }}"
+    api_token: "{{ api_token }}"
+    state: absent
+    name: "Name Lookup Test Node"
+
+# ===========================================
+# Section 10.6: Inbound Tag Resolution Tests
+# ===========================================
+
+- name: Create node using inbound TAG (not UUID)
+  ilyagulya.remnawave.node:
+    api_url: "{{ api_url }}"
+    api_token: "{{ api_token }}"
+    state: present
+    name: "Inbound Tag Test Node"
+    address: "10.0.0.202"
+    port: 443
+    config_profile:
+      active_config_profile: "E2E Test Profile"
+      active_inbound_tags:
+        - "UpdatedInbound"
+  register: inbound_tag_result
+
+- name: Assert node with inbound tag was created
+  ansible.builtin.assert:
+    that:
+      - inbound_tag_result.changed
+      - inbound_tag_result.response.uuid is defined
+    fail_msg: "Node creation with inbound tag lookup failed"
+
+- name: Create same node again (idempotency with inbound tag)
+  ilyagulya.remnawave.node:
+    api_url: "{{ api_url }}"
+    api_token: "{{ api_token }}"
+    state: present
+    name: "Inbound Tag Test Node"
+    address: "10.0.0.202"
+    port: 443
+    config_profile:
+      active_config_profile: "E2E Test Profile"
+      active_inbound_tags:
+        - "UpdatedInbound"
+  register: inbound_tag_idempotent
+
+- name: Assert inbound tag lookup is idempotent
+  ansible.builtin.assert:
+    that:
+      - not inbound_tag_idempotent.changed
+    fail_msg: "Node with inbound tag lookup should be idempotent"
+
+- name: Test error when inbound tag not found
+  ilyagulya.remnawave.node:
+    api_url: "{{ api_url }}"
+    api_token: "{{ api_token }}"
+    state: present
+    name: "Nonexistent Inbound Node"
+    address: "10.0.0.203"
+    port: 443
+    config_profile:
+      active_config_profile: "E2E Test Profile"
+      active_inbound_tags:
+        - "NonexistentInbound"
+  ignore_errors: true
+  register: inbound_not_found_result
+
+- name: Assert inbound not found error
+  ansible.builtin.assert:
+    that:
+      - inbound_not_found_result.failed
+      - "'not found' in inbound_not_found_result.msg"
+    fail_msg: "Should fail when inbound tag is not found"
+
+- name: Cleanup inbound tag test node
+  ilyagulya.remnawave.node:
+    api_url: "{{ api_url }}"
+    api_token: "{{ api_token }}"
+    state: absent
+    name: "Inbound Tag Test Node"

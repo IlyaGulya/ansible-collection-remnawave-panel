@@ -1,0 +1,94 @@
+---
+- name: Verify E2E cleanup
+  hosts: localhost
+  gather_facts: false
+  vars:
+    api_url: "http://localhost:8080"
+    api_token: "{{ lookup('file', molecule_scenario_directory + '/.api-token') | trim }}"
+
+  tasks:
+    # ===========================================
+    # Verify Node Cleanup
+    # ===========================================
+
+    - name: Verify E2E Test Node was cleaned up
+      ilyagulya.remnawave.node:
+        api_url: "{{ api_url }}"
+        api_token: "{{ api_token }}"
+        state: absent
+        name: "E2E Test Node"
+      register: verify_node_cleanup
+
+    - name: Assert E2E Test Node does not exist
+      ansible.builtin.assert:
+        that:
+          - not verify_node_cleanup.changed
+        fail_msg: "E2E Test Node should have been cleaned up"
+
+    - name: Verify Full Params Node was cleaned up
+      ilyagulya.remnawave.node:
+        api_url: "{{ api_url }}"
+        api_token: "{{ api_token }}"
+        state: absent
+        name: "Full Params Node"
+      register: verify_full_params_node_cleanup
+
+    - name: Assert Full Params Node does not exist
+      ansible.builtin.assert:
+        that:
+          - not verify_full_params_node_cleanup.changed
+        fail_msg: "Full Params Node should have been cleaned up"
+
+    # ===========================================
+    # Verify Config Profile Cleanup
+    # ===========================================
+
+    - name: Verify E2E Test Profile was cleaned up
+      ilyagulya.remnawave.config_profile:
+        api_url: "{{ api_url }}"
+        api_token: "{{ api_token }}"
+        state: absent
+        name: "E2E Test Profile"
+      register: verify_profile_cleanup
+
+    - name: Assert E2E Test Profile does not exist
+      ansible.builtin.assert:
+        that:
+          - not verify_profile_cleanup.changed
+        fail_msg: "E2E Test Profile should have been cleaned up"
+
+    - name: Verify UUID Lookup Profile was cleaned up
+      ilyagulya.remnawave.config_profile:
+        api_url: "{{ api_url }}"
+        api_token: "{{ api_token }}"
+        state: absent
+        name: "UUID Lookup Profile"
+      register: verify_uuid_lookup_profile_cleanup
+
+    - name: Assert UUID Lookup Profile does not exist
+      ansible.builtin.assert:
+        that:
+          - not verify_uuid_lookup_profile_cleanup.changed
+        fail_msg: "UUID Lookup Profile should have been cleaned up"
+
+    - name: Verify Check Mode Profile was not created
+      ilyagulya.remnawave.config_profile:
+        api_url: "{{ api_url }}"
+        api_token: "{{ api_token }}"
+        state: absent
+        name: "Check Mode Profile"
+      register: verify_check_mode_profile_cleanup
+
+    - name: Assert Check Mode Profile does not exist
+      ansible.builtin.assert:
+        that:
+          - not verify_check_mode_profile_cleanup.changed
+        fail_msg: "Check Mode Profile should not exist"
+
+    # ===========================================
+    # Final Summary
+    # ===========================================
+
+    - name: E2E tests completed successfully
+      ansible.builtin.debug:
+        msg: "All E2E tests passed and resources cleaned up"

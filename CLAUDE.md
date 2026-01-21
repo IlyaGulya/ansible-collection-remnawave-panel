@@ -82,8 +82,8 @@ src/remnawave_ansible_gen/config.yaml (overrides only)
          ↓
 src/remnawave_ansible_gen/templates/*.j2 (Jinja2 templates)
          ↓
-ansible_collections/remnawave/panel/plugins/modules/*.py (generated Ansible modules)
-ansible_collections/remnawave/panel/plugins/module_utils/remnawave.py (generated shared utilities)
+ansible_collections/ilyagulya/remnawave/plugins/modules/*.py (generated Ansible modules)
+ansible_collections/ilyagulya/remnawave/plugins/module_utils/remnawave.py (generated shared utilities)
 ```
 
 ### Key Files
@@ -93,9 +93,9 @@ ansible_collections/remnawave/panel/plugins/module_utils/remnawave.py (generated
   - `read_only_fields` - global fields excluded from idempotency checks
   - `module_overrides` - per-module fixes for edge cases (extra read_only_fields, custom descriptions)
 - **`src/remnawave_ansible_gen/generate.py`**: Auto-discovers module config from OpenAPI spec patterns, then renders Jinja2 templates
-- **`ansible_collections/remnawave/panel/plugins/module_utils/remnawave.py`**: Generated HTTP client with `get_all()` that extracts lists from nested API responses, plus `recursive_diff()` for idempotency
-- **`ansible_collections/remnawave/panel/plugins/modules/*.py`**: Generated Ansible modules (DO NOT EDIT - regenerate instead)
-- **`ansible_collections/remnawave/panel/tests/unit/`**: Unit tests for module_utils
+- **`ansible_collections/ilyagulya/remnawave/plugins/module_utils/remnawave.py`**: Generated HTTP client with `get_all()` that extracts lists from nested API responses, plus `recursive_diff()` for idempotency
+- **`ansible_collections/ilyagulya/remnawave/plugins/modules/*.py`**: Generated Ansible modules (DO NOT EDIT - regenerate instead)
+- **`ansible_collections/ilyagulya/remnawave/tests/unit/`**: Unit tests for module_utils
 
 ### Testing Infrastructure
 
@@ -128,7 +128,7 @@ If you need to understand Remnawave internals (API behavior, error codes, authen
 ```bash
 git clone --depth 1 https://github.com/remnawave/backend.git .claudetmp/backend
 git clone --depth 1 https://github.com/remnawave/node.git .claudetmp/node
-git clone --depth 1 https://github.com/remnawave/panel.git .claudetmp/panel
+git clone --depth 1 https://github.com/ilyagulya/remnawave.git .claudetmp/panel
 ```
 
 Useful locations in backend:
@@ -175,7 +175,7 @@ When writing examples that include Xray configuration (the `config` parameter wi
 ```yaml
 # Good - JSON syntax for entire config
 - name: Create config profile
-  remnawave.panel.config_profile:
+  ilyagulya.remnawave.config_profile:
     state: present
     name: "my-profile"
     config:
@@ -192,7 +192,7 @@ When writing examples that include Xray configuration (the `config` parameter wi
 
 # Bad - YAML format for config
 - name: Create config profile
-  remnawave.panel.config_profile:
+  ilyagulya.remnawave.config_profile:
     state: present
     name: "my-profile"
     config:

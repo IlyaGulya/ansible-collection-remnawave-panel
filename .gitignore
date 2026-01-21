@@ -17,3 +17,7 @@ __pycache__/
 # Ansible cache directories
 .ansible/
 **/.ansible/
+
+# Collection build artifacts
+*.tar.gz
+.tox/
