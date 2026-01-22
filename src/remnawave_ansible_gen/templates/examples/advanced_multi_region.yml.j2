@@ -18,7 +18,7 @@
 
     - name: Create config profile for multi-region deployment
       ilyagulya.remnawave.config_profile:
-        api_url: "{{ '{{' }} remnawave_api_url {{ '}}' }}"
+        panel_url: "{{ '{{' }} remnawave_panel_url {{ '}}' }}"
         api_token: "{{ '{{' }} remnawave_api_token {{ '}}' }}"
         state: present
         name: "{{ '{{' }} config_profile_name {{ '}}' }}"
@@ -36,7 +36,7 @@
 
     - name: Create nodes in multiple regions
       ilyagulya.remnawave.node:
-        api_url: "{{ '{{' }} remnawave_api_url {{ '}}' }}"
+        panel_url: "{{ '{{' }} remnawave_panel_url {{ '}}' }}"
         api_token: "{{ '{{' }} remnawave_api_token {{ '}}' }}"
         state: present
         name: "{{ '{{' }} item.name {{ '}}' }}"

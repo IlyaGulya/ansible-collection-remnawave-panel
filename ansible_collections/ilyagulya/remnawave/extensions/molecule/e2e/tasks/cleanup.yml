@@ -5,7 +5,7 @@
 
 - name: Delete full params node
   ilyagulya.remnawave.node:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: absent
     name: "Full Params Node"
@@ -19,7 +19,7 @@
 
 - name: Delete full params node again (idempotency test)
   ilyagulya.remnawave.node:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: absent
     name: "Full Params Node"
@@ -33,7 +33,7 @@
 
 - name: Delete test node
   ilyagulya.remnawave.node:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: absent
     name: "E2E Test Node"
@@ -47,7 +47,7 @@
 
 - name: Delete node again (idempotency test)
   ilyagulya.remnawave.node:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: absent
     name: "E2E Test Node"
@@ -61,7 +61,7 @@
 
 - name: Delete UUID lookup profile
   ilyagulya.remnawave.config_profile:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: absent
     name: "UUID Lookup Profile"
@@ -75,7 +75,7 @@
 
 - name: Delete UUID lookup profile again (idempotency test)
   ilyagulya.remnawave.config_profile:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: absent
     name: "UUID Lookup Profile"
@@ -89,7 +89,7 @@
 
 - name: Delete test config profile
   ilyagulya.remnawave.config_profile:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: absent
     name: "E2E Test Profile"
@@ -103,7 +103,7 @@
 
 - name: Delete config profile again (idempotency test)
   ilyagulya.remnawave.config_profile:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: absent
     name: "E2E Test Profile"

@@ -20,7 +20,7 @@
 
     - name: Delete all nodes
       ilyagulya.remnawave.node:
-        api_url: "{{ remnawave_api_url }}"
+        panel_url: "{{ remnawave_panel_url }}"
         api_token: "{{ remnawave_api_token }}"
         state: absent
         name: "{{ item.name }}"
@@ -42,7 +42,7 @@
 
     - name: Delete all config profiles
       ilyagulya.remnawave.config_profile:
-        api_url: "{{ remnawave_api_url }}"
+        panel_url: "{{ remnawave_panel_url }}"
         api_token: "{{ remnawave_api_token }}"
         state: absent
         name: "{{ item.name }}"

@@ -140,16 +140,16 @@ def _lists_equal(list1, list2):
 class RemnawaveClient:
     """HTTP client for Remnawave API."""
 
-    def __init__(self, api_url, api_token, validate_certs=True, timeout=30):
+    def __init__(self, panel_url, api_token, validate_certs=True, timeout=30):
         """Initialize the client."""
-        self.api_url = api_url.rstrip("/")
+        self.panel_url = panel_url.rstrip("/")
         self.api_token = api_token
         self.validate_certs = validate_certs
         self.timeout = timeout
 
     def _request(self, method, path, data=None):
         """Make an HTTP request to the API."""
-        url = f"{self.api_url}{path}"
+        url = f"{self.panel_url}{path}"
         headers = {
             "Authorization": f"Bearer {self.api_token}",
             "Content-Type": "application/json",

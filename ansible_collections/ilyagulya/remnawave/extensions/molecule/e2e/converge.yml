@@ -3,7 +3,7 @@
   hosts: localhost
   gather_facts: false
   vars:
-    api_url: "http://localhost:8080"
+    panel_url: "http://localhost:8080"
     api_token: "{{ lookup('file', molecule_scenario_directory + '/.api-token') | trim }}"
   vars_files:
     - vars/test_data.yml

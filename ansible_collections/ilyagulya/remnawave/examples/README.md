@@ -100,7 +100,7 @@ ansible-playbook basic/config_profile_create.yml -e @vars/example_vars.yml
 
 # Or with inline variables
 ansible-playbook basic/config_profile_create.yml \
-  -e remnawave_api_url=https://panel.example.com \
+  -e remnawave_panel_url=https://panel.example.com \
   -e remnawave_api_token=your-token
 ```
 
@@ -150,7 +150,7 @@ ansible-playbook workflows/production_teardown.yml -e @vars/production_vars.yml
 
 | Variable | Description |
 |----------|-------------|
-| `remnawave_api_url` | URL of your Remnawave panel (e.g., `https://panel.example.com`) |
+| `remnawave_panel_url` | Base URL of your Remnawave panel (e.g., `https://panel.example.com`). Do not include `/api`. |
 | `remnawave_api_token` | API token for authentication |
 
 ### Optional Variables

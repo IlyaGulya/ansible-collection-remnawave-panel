@@ -13,7 +13,7 @@
   tasks:
     - name: Create config profile
       ilyagulya.remnawave.config_profile:
-        api_url: "{{ remnawave_api_url }}"
+        panel_url: "{{ remnawave_panel_url }}"
         api_token: "{{ remnawave_api_token }}"
         state: present
         name: "{{ config_profile_name }}"

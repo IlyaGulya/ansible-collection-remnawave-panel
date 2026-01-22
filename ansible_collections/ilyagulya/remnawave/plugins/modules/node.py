@@ -23,10 +23,11 @@ description:
     - Supports check mode for dry-run operations.
     - Implements idempotency by comparing desired state with current state.
 options:
-    api_url:
+    panel_url:
         description:
-            - The URL of the Remnawave panel API.
-            - Can be set via the C(REMNAWAVE_API_URL) environment variable.
+            - The base URL of the Remnawave panel (e.g., https://panel.example.com).
+            - Do not include the /api path suffix.
+            - Can be set via the C(REMNAWAVE_PANEL_URL) environment variable.
         type: str
         required: true
     api_token:
@@ -138,7 +139,7 @@ notes:
 EXAMPLES = r"""
 - name: Create a new node
   ilyagulya.remnawave.node:
-    api_url: "https://panel.example.com"
+    panel_url: "https://panel.example.com"
     api_token: "{{ api_token }}"
     state: present
     name: "example_value"
@@ -147,7 +148,7 @@ EXAMPLES = r"""
 
 - name: Update an existing node
   ilyagulya.remnawave.node:
-    api_url: "https://panel.example.com"
+    panel_url: "https://panel.example.com"
     api_token: "{{ api_token }}"
     state: present
     uuid: "existing-uuid-here"
@@ -157,14 +158,14 @@ EXAMPLES = r"""
 
 - name: Delete a node
   ilyagulya.remnawave.node:
-    api_url: "https://panel.example.com"
+    panel_url: "https://panel.example.com"
     api_token: "{{ api_token }}"
     state: absent
     uuid: "uuid-to-delete"
 
 - name: Delete a node by name
   ilyagulya.remnawave.node:
-    api_url: "https://panel.example.com"
+    panel_url: "https://panel.example.com"
     api_token: "{{ api_token }}"
     state: absent
     name: "resource-name-to-delete"
@@ -260,7 +261,7 @@ def run_module():
     """Main module execution."""
     # Define argument spec
     module_args = dict(
-        api_url=dict(type="str", required=True, fallback=(env_fallback, ["REMNAWAVE_API_URL"])),
+        panel_url=dict(type="str", required=True, fallback=(env_fallback, ["REMNAWAVE_PANEL_URL"])),
         api_token=dict(type="str", required=True, no_log=True, fallback=(env_fallback, ["REMNAWAVE_API_TOKEN"])),
         validate_certs=dict(type="bool", default=True),
         timeout=dict(type="int", default=30),
@@ -345,7 +346,7 @@ def run_module():
 
     # Initialize client
     client = RemnawaveClient(
-        api_url=module.params["api_url"],
+        panel_url=module.params["panel_url"],
         api_token=module.params["api_token"],
         validate_certs=module.params["validate_certs"],
         timeout=module.params["timeout"],

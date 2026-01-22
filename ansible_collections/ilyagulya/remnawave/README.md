@@ -18,8 +18,8 @@ ansible-galaxy collection install ilyagulya.remnawave
 ```yaml
 - name: Example
   ilyagulya.remnawave.node:
-    api_url: "https://panel.example.com"  # or REMNAWAVE_API_URL env
-    api_token: "{{ api_token }}"          # or REMNAWAVE_API_TOKEN env
+    panel_url: "https://panel.example.com"  # or REMNAWAVE_PANEL_URL env
+    api_token: "{{ api_token }}"            # or REMNAWAVE_API_TOKEN env
     state: present
     name: "my-node"
     address: "192.168.1.100"

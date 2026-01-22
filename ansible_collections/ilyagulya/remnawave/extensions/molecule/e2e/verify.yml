@@ -3,7 +3,7 @@
   hosts: localhost
   gather_facts: false
   vars:
-    api_url: "http://localhost:8080"
+    panel_url: "http://localhost:8080"
     api_token: "{{ lookup('file', molecule_scenario_directory + '/.api-token') | trim }}"
 
   tasks:
@@ -13,7 +13,7 @@
 
     - name: Verify E2E Test Node was cleaned up
       ilyagulya.remnawave.node:
-        api_url: "{{ api_url }}"
+        panel_url: "{{ panel_url }}"
         api_token: "{{ api_token }}"
         state: absent
         name: "E2E Test Node"
@@ -27,7 +27,7 @@
 
     - name: Verify Full Params Node was cleaned up
       ilyagulya.remnawave.node:
-        api_url: "{{ api_url }}"
+        panel_url: "{{ panel_url }}"
         api_token: "{{ api_token }}"
         state: absent
         name: "Full Params Node"
@@ -45,7 +45,7 @@
 
     - name: Verify E2E Test Profile was cleaned up
       ilyagulya.remnawave.config_profile:
-        api_url: "{{ api_url }}"
+        panel_url: "{{ panel_url }}"
         api_token: "{{ api_token }}"
         state: absent
         name: "E2E Test Profile"
@@ -59,7 +59,7 @@
 
     - name: Verify UUID Lookup Profile was cleaned up
       ilyagulya.remnawave.config_profile:
-        api_url: "{{ api_url }}"
+        panel_url: "{{ panel_url }}"
         api_token: "{{ api_token }}"
         state: absent
         name: "UUID Lookup Profile"
@@ -73,7 +73,7 @@
 
     - name: Verify Check Mode Profile was not created
       ilyagulya.remnawave.config_profile:
-        api_url: "{{ api_url }}"
+        panel_url: "{{ panel_url }}"
         api_token: "{{ api_token }}"
         state: absent
         name: "Check Mode Profile"

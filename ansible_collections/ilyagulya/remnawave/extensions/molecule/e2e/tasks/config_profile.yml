@@ -5,7 +5,7 @@
 
 - name: Create a config profile
   ilyagulya.remnawave.config_profile:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: present
     name: "E2E Test Profile"
@@ -22,7 +22,7 @@
 
 - name: Create same config profile again (idempotency test)
   ilyagulya.remnawave.config_profile:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: present
     name: "E2E Test Profile"
@@ -47,7 +47,7 @@
 
 - name: Update config profile
   ilyagulya.remnawave.config_profile:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: present
     name: "E2E Test Profile"
@@ -63,7 +63,7 @@
 
 - name: Update config profile again (idempotency test)
   ilyagulya.remnawave.config_profile:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: present
     name: "E2E Test Profile"
@@ -87,7 +87,7 @@
 
 - name: Create config profile in check mode
   ilyagulya.remnawave.config_profile:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: present
     name: "Check Mode Profile"
@@ -112,7 +112,7 @@
 
 - name: Verify check mode did not create profile
   ilyagulya.remnawave.config_profile:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: absent
     name: "Check Mode Profile"
@@ -126,7 +126,7 @@
 
 - name: Update existing profile in check mode
   ilyagulya.remnawave.config_profile:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: present
     name: "E2E Test Profile"
@@ -152,7 +152,7 @@
 
 - name: Delete existing profile in check mode
   ilyagulya.remnawave.config_profile:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: absent
     name: "E2E Test Profile"
@@ -169,7 +169,7 @@
 
 - name: Verify profile still exists after check mode delete
   ilyagulya.remnawave.config_profile:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: present
     name: "E2E Test Profile"
@@ -188,7 +188,7 @@
 
 - name: Create UUID lookup profile
   ilyagulya.remnawave.config_profile:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: present
     name: "UUID Lookup Profile"
@@ -204,7 +204,7 @@
 
 - name: Lookup config profile by UUID
   ilyagulya.remnawave.config_profile:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: present
     uuid: "{{ uuid_lookup_profile_result.response.uuid }}"

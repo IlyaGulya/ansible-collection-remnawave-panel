@@ -5,7 +5,7 @@
 
 - name: Create a node
   ilyagulya.remnawave.node:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: present
     name: "E2E Test Node"
@@ -26,7 +26,7 @@
 
 - name: Create same node again (idempotency test)
   ilyagulya.remnawave.node:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: present
     name: "E2E Test Node"
@@ -50,7 +50,7 @@
 
 - name: Update node address
   ilyagulya.remnawave.node:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: present
     name: "E2E Test Node"
@@ -70,7 +70,7 @@
 
 - name: Update node address again (idempotency test)
   ilyagulya.remnawave.node:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: present
     name: "E2E Test Node"
@@ -99,7 +99,7 @@
 
 - name: Create node with all optional parameters
   ilyagulya.remnawave.node:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: present
     name: "Full Params Node"
@@ -133,7 +133,7 @@
 
 - name: Create full params node again (idempotency test)
   ilyagulya.remnawave.node:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: present
     name: "Full Params Node"
@@ -159,7 +159,7 @@
 
 - name: Update traffic settings
   ilyagulya.remnawave.node:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: present
     name: "Full Params Node"
@@ -192,7 +192,7 @@
 # --- 8.1: Node Create in Check Mode ---
 - name: Create node in check mode (new resource)
   ilyagulya.remnawave.node:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: present
     name: "Check Mode Node"
@@ -218,7 +218,7 @@
 
 - name: Verify check mode did not create node
   ilyagulya.remnawave.node:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: absent
     name: "Check Mode Node"
@@ -233,7 +233,7 @@
 # --- 8.2: Node Update in Check Mode ---
 - name: Update node in check mode
   ilyagulya.remnawave.node:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: present
     name: "E2E Test Node"
@@ -259,7 +259,7 @@
 
 - name: Delete node in check mode
   ilyagulya.remnawave.node:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: absent
     name: "E2E Test Node"
@@ -276,7 +276,7 @@
 
 - name: Verify node still exists after check mode delete
   ilyagulya.remnawave.node:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: present
     name: "E2E Test Node"
@@ -300,7 +300,7 @@
 
 - name: Lookup node by UUID
   ilyagulya.remnawave.node:
-    api_url: "{{ api_url }}"
+    panel_url: "{{ panel_url }}"
     api_token: "{{ api_token }}"
     state: present
     uuid: "{{ node_uuid }}"

@@ -18,7 +18,7 @@
 
     - name: Preview config profile creation (check mode)
       ilyagulya.remnawave.config_profile:
-        api_url: "{{ '{{' }} remnawave_api_url {{ '}}' }}"
+        panel_url: "{{ '{{' }} remnawave_panel_url {{ '}}' }}"
         api_token: "{{ '{{' }} remnawave_api_token {{ '}}' }}"
         state: present
         name: "Check Mode Test Profile"
@@ -35,7 +35,7 @@
 
     - name: Preview node creation (check mode)
       ilyagulya.remnawave.node:
-        api_url: "{{ '{{' }} remnawave_api_url {{ '}}' }}"
+        panel_url: "{{ '{{' }} remnawave_panel_url {{ '}}' }}"
         api_token: "{{ '{{' }} remnawave_api_token {{ '}}' }}"
         state: present
         name: "Check Mode Test Node"

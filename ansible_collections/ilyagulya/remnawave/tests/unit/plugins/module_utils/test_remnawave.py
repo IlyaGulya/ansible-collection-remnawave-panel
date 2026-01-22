@@ -581,14 +581,14 @@ class TestRemnawaveClient:
     """Test cases for RemnawaveClient class."""
 
     def test_init_strips_trailing_slash(self):
-        """Client should strip trailing slash from API URL."""
-        client = RemnawaveClient("https://api.example.com/", "token123")
-        assert client.api_url == "https://api.example.com"
+        """Client should strip trailing slash from panel URL."""
+        client = RemnawaveClient("https://panel.example.com/", "token123")
+        assert client.panel_url == "https://panel.example.com"
 
     def test_init_preserves_url_without_slash(self):
         """Client should preserve URL without trailing slash."""
-        client = RemnawaveClient("https://api.example.com", "token123")
-        assert client.api_url == "https://api.example.com"
+        client = RemnawaveClient("https://panel.example.com", "token123")
+        assert client.panel_url == "https://panel.example.com"
 
     def test_init_stores_token(self):
         """Client should store API token."""

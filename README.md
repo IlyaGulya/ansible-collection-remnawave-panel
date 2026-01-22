@@ -34,7 +34,7 @@ collections:
 
 1. Set your credentials:
    ```bash
-   export REMNAWAVE_API_URL="https://panel.example.com"
+   export REMNAWAVE_PANEL_URL="https://panel.example.com"
    export REMNAWAVE_API_TOKEN="your-api-token"
    ```
 
@@ -77,7 +77,7 @@ All modules require API credentials:
 
 | Parameter | Environment Variable | Description |
 |-----------|---------------------|-------------|
-| `api_url` | `REMNAWAVE_API_URL` | Panel API URL |
+| `panel_url` | `REMNAWAVE_PANEL_URL` | Base URL of the Remnawave panel (without `/api`) |
 | `api_token` | `REMNAWAVE_API_TOKEN` | API token |
 
 Create an API token in the Remnawave panel under Settings > API Tokens.
@@ -89,7 +89,7 @@ Create an API token in the Remnawave panel under Settings > API Tokens.
 ```yaml
 - name: Create a config profile
   ilyagulya.remnawave.config_profile:
-    api_url: "https://panel.example.com"
+    panel_url: "https://panel.example.com"
     api_token: "{{ api_token }}"
     state: present
     name: "production-config"
@@ -107,7 +107,7 @@ Create an API token in the Remnawave panel under Settings > API Tokens.
 
 - name: Delete a config profile
   ilyagulya.remnawave.config_profile:
-    api_url: "https://panel.example.com"
+    panel_url: "https://panel.example.com"
     api_token: "{{ api_token }}"
     state: absent
     name: "production-config"
@@ -118,7 +118,7 @@ Create an API token in the Remnawave panel under Settings > API Tokens.
 ```yaml
 - name: Create a node (using name-based lookup)
   ilyagulya.remnawave.node:
-    api_url: "https://panel.example.com"
+    panel_url: "https://panel.example.com"
     api_token: "{{ api_token }}"
     state: present
     name: "edge-server-1"
@@ -131,7 +131,7 @@ Create an API token in the Remnawave panel under Settings > API Tokens.
 
 - name: Delete a node
   ilyagulya.remnawave.node:
-    api_url: "https://panel.example.com"
+    panel_url: "https://panel.example.com"
     api_token: "{{ api_token }}"
     state: absent
     name: "edge-server-1"
@@ -150,7 +150,7 @@ Create an API token in the Remnawave panel under Settings > API Tokens.
       active_inbound_tags:
         - "vless-tcp"
   environment:
-    REMNAWAVE_API_URL: "https://panel.example.com"
+    REMNAWAVE_PANEL_URL: "https://panel.example.com"
     REMNAWAVE_API_TOKEN: "{{ vault_api_token }}"
 ```
 

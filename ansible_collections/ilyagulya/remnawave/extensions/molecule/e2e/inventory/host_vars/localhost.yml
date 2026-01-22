@@ -1,6 +1,6 @@
 ---
-# API endpoint for E2E tests (Caddy reverse proxy)
-api_url: "http://localhost:8080"
+# Panel URL for E2E tests (Caddy reverse proxy)
+panel_url: "http://localhost:8080"
 
 # Note: api_token is NOT defined here because:
 # 1. It's generated during the create phase

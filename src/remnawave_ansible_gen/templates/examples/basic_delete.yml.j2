@@ -13,7 +13,7 @@
   tasks:
     - name: Delete {{ resource_name | lower }} by {{ lookup_field }}
       ilyagulya.remnawave.{{ module_name }}:
-        api_url: "{{ '{{' }} remnawave_api_url {{ '}}' }}"
+        panel_url: "{{ '{{' }} remnawave_panel_url {{ '}}' }}"
         api_token: "{{ '{{' }} remnawave_api_token {{ '}}' }}"
         state: absent
         {{ lookup_field }}: "{{ '{{' }} {{ lookup_field_var }} {{ '}}' }}"

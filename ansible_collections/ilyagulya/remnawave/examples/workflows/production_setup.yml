@@ -19,7 +19,7 @@
 
     - name: Create config profiles for each region
       ilyagulya.remnawave.config_profile:
-        api_url: "{{ remnawave_api_url }}"
+        panel_url: "{{ remnawave_panel_url }}"
         api_token: "{{ remnawave_api_token }}"
         state: present
         name: "{{ item.name }}"
@@ -68,7 +68,7 @@
 
     - name: Create nodes with regional profile assignment
       ilyagulya.remnawave.node:
-        api_url: "{{ remnawave_api_url }}"
+        panel_url: "{{ remnawave_panel_url }}"
         api_token: "{{ remnawave_api_token }}"
         state: present
         name: "{{ item.name }}"
