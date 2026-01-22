@@ -24,14 +24,15 @@ ansible-galaxy collection install ilyagulya.remnawave
     name: "my-node"
     address: "192.168.1.100"
     config_profile:
-      active_config_profile_uuid: "..."
-      active_inbounds: []
+      active_config_profile: "my-profile"   # Reference by name
+      active_inbound_tags:
+        - "vless-tcp"                       # Reference by tag
 ```
 
 ## Requirements
 
-- Ansible >= 2.14
-- Python >= 3.9
+- Ansible >= 2.15
+- Python >= 3.11
 - Remnawave Panel >= 2.5.0
 
 ## Repository
