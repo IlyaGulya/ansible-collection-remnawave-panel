@@ -29,3 +29,4 @@ class DiscoveredResource:
     fields: list[dict[str, Any]] = field(default_factory=list)
     read_only_fields: list[str] = field(default_factory=list)
     resolve_uuid_by_name: bool = False  # Enable config profile name resolution
+    field_renames: dict[str, str] = field(default_factory=dict)  # API field name -> user-friendly name

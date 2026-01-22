@@ -297,6 +297,71 @@ class TestSnakeToCamelDict:
 
 
 # =============================================================================
+# Tests for snake_to_camel_dict() with field aliases
+# =============================================================================
+
+
+class TestSnakeToCamelDictWithAliases:
+    """Tests for snake_to_camel_dict with field aliases."""
+
+    def test_applies_field_alias(self):
+        """snake_to_camel_dict should apply field aliases when provided."""
+        aliases = {"activeInboundUuids": "activeInbounds"}
+        input_dict = {"active_inbound_uuids": ["uuid1", "uuid2"]}
+        result = snake_to_camel_dict(input_dict, aliases)
+        assert "activeInbounds" in result
+        assert "activeInboundUuids" not in result
+        assert result["activeInbounds"] == ["uuid1", "uuid2"]
+
+    def test_nested_alias(self):
+        """Field aliases should work for nested dicts."""
+        aliases = {"activeInboundUuids": "activeInbounds"}
+        input_dict = {
+            "config_profile": {
+                "active_config_profile_uuid": "profile-uuid",
+                "active_inbound_uuids": ["uuid1"],
+            }
+        }
+        result = snake_to_camel_dict(input_dict, aliases)
+        assert result["configProfile"]["activeInbounds"] == ["uuid1"]
+
+    def test_no_alias_without_dict(self):
+        """Without aliases, conversion works as before."""
+        input_dict = {"active_inbound_uuids": ["uuid1"]}
+        result = snake_to_camel_dict(input_dict)
+        assert "activeInboundUuids" in result
+        assert result["activeInboundUuids"] == ["uuid1"]
+
+    def test_empty_aliases(self):
+        """Empty aliases dict works like no aliases."""
+        input_dict = {"some_field": "value"}
+        result = snake_to_camel_dict(input_dict, {})
+        assert result == {"someField": "value"}
+
+    def test_alias_with_list_of_dicts(self):
+        """Field aliases should work for lists of dicts."""
+        aliases = {"activeInboundUuids": "activeInbounds"}
+        input_list = [
+            {"active_inbound_uuids": ["uuid1"]},
+            {"active_inbound_uuids": ["uuid2"]},
+        ]
+        result = snake_to_camel_dict(input_list, aliases)
+        assert result[0]["activeInbounds"] == ["uuid1"]
+        assert result[1]["activeInbounds"] == ["uuid2"]
+
+    def test_alias_preserves_other_keys(self):
+        """Aliases should only affect specified keys."""
+        aliases = {"activeInboundUuids": "activeInbounds"}
+        input_dict = {
+            "active_inbound_uuids": ["uuid1"],
+            "other_field": "value",
+        }
+        result = snake_to_camel_dict(input_dict, aliases)
+        assert result["activeInbounds"] == ["uuid1"]
+        assert result["otherField"] == "value"
+
+
+# =============================================================================
 # Tests for _lists_equal()
 # =============================================================================
 

@@ -54,6 +54,10 @@ module_overrides:
       - nodeVersion
       - xrayUptime
       - trafficUsedBytes
+    # Rename API fields to user-friendly names (both in snake_case)
+    # original_api_name: user_friendly_name
+    field_renames:
+      active_inbounds: active_inbound_uuids
 
   config_profile:
     description: Manage Remnawave panel configuration profiles

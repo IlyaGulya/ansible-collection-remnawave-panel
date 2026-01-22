@@ -240,8 +240,10 @@ from ansible_collections.ilyagulya.remnawave.plugins.module_utils.remnawave impo
 )
 
 
-def build_payload(params, fields):
+def build_payload(params, fields, field_aliases=None):
     """Build the API payload from module parameters."""
+    if field_aliases is None:
+        field_aliases = {}
     payload = {}
     for field in fields:
         snake_name = field["snake_name"]
@@ -250,9 +252,9 @@ def build_payload(params, fields):
         if value is not None:
             # Convert nested dict keys from snake_case to camelCase
             if isinstance(value, dict):
-                value = snake_to_camel_dict(value)
+                value = snake_to_camel_dict(value, field_aliases)
             elif isinstance(value, list):
-                value = [snake_to_camel_dict(item) if isinstance(item, dict) else item for item in value]
+                value = [snake_to_camel_dict(item, field_aliases) if isinstance(item, dict) else item for item in value]
             payload[camel_name] = value
     return payload
 
@@ -335,6 +337,11 @@ def run_module():
         {"snake_name": "provider_uuid", "name": "providerUuid"},
         {"snake_name": "tags", "name": "tags"},
     ]
+
+    # Field aliases for nested dict conversion (user-facing camelCase -> API camelCase)
+    field_aliases = {
+        "activeInboundUuids": "activeInbounds",
+    }
 
     module = AnsibleModule(
         argument_spec=module_args,
@@ -424,7 +431,7 @@ def run_module():
             module.exit_json(**result)
 
         # state == "present"
-        payload = build_payload(module.params, fields)
+        payload = build_payload(module.params, fields, field_aliases)
 
         if not existing:
             # CREATE

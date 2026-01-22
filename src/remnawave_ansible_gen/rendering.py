@@ -48,6 +48,15 @@ def render_module(
         if update_schema:
             update_fields = extract_fields_from_schema(update_schema, read_only_fields)
 
+    # Convert declarative field_renames to runtime aliases
+    # field_renames: {original_snake: renamed_snake}
+    # field_aliases: {renamed_camel: original_camel} (reverse mapping for API payload)
+    field_renames = module_config.get("field_renames", {})
+    field_aliases = {
+        to_camel_case(renamed_snake): to_camel_case(original_snake)
+        for original_snake, renamed_snake in field_renames.items()
+    }
+
     return str(
         template.render(
             module_name=module_config["name"],
@@ -59,6 +68,7 @@ def render_module(
             fields=fields,
             update_fields=update_fields if update_fields else fields,
             read_only_fields=read_only_fields,
+            field_aliases=field_aliases,
             resolve_uuid_by_name=module_config.get("resolve_uuid_by_name", False),
             collection_version=collection_version,
             api_version=api_version,

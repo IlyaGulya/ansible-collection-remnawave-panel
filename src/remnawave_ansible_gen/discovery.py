@@ -335,6 +335,8 @@ def apply_overrides(
         resource.description = module_override["description"]
     if module_override.get("resolve_uuid_by_name"):
         resource.resolve_uuid_by_name = True
+    if "field_renames" in module_override:
+        resource.field_renames = module_override["field_renames"]
 
     return resource
 
@@ -377,4 +379,5 @@ def discovered_to_module_config(resource: DiscoveredResource) -> dict[str, Any]:
         "lookup_field": resource.lookup_field,
         "endpoints": endpoints,
         "resolve_uuid_by_name": resource.resolve_uuid_by_name,
+        "field_renames": resource.field_renames,
     }

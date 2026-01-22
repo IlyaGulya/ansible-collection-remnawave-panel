@@ -59,12 +59,20 @@ def camel_to_snake_dict(d):
     return d
 
 
-def snake_to_camel_dict(d):
+def snake_to_camel_dict(d, field_aliases=None):
     """Recursively convert dictionary keys from snake_case to camelCase."""
+    if field_aliases is None:
+        field_aliases = {}
     if isinstance(d, dict):
-        return {to_camel_case(k): snake_to_camel_dict(v) for k, v in d.items()}
+        result = {}
+        for k, v in d.items():
+            camel_key = to_camel_case(k)
+            # Apply alias if exists (e.g., activeInboundUuids -> activeInbounds)
+            camel_key = field_aliases.get(camel_key, camel_key)
+            result[camel_key] = snake_to_camel_dict(v, field_aliases)
+        return result
     elif isinstance(d, list):
-        return [snake_to_camel_dict(item) for item in d]
+        return [snake_to_camel_dict(item, field_aliases) for item in d]
     return d
 
 
