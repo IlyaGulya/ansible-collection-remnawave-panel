@@ -1,5 +1,9 @@
 # Remnawave Ansible Collection
 
+[![Ansible Galaxy](https://img.shields.io/badge/ansible--galaxy-ilyagulya.remnawave-blue.svg)](https://galaxy.ansible.com/ui/repo/published/ilyagulya/remnawave/)
+[![Release](https://img.shields.io/github/v/release/IlyaGulya/ansible-collection-remnawave-panel)](https://github.com/IlyaGulya/ansible-collection-remnawave-panel/releases)
+[![License](https://img.shields.io/github/license/IlyaGulya/ansible-collection-remnawave-panel)](LICENSE)
+
 Ansible collection for managing [Remnawave](https://github.com/remnawave/panel) VPN panel resources.
 
 **Collection version:** 0.1.0 (generated from Remnawave API 2.5.3)
@@ -28,6 +32,13 @@ Or add to `requirements.yml`:
 collections:
   - name: ilyagulya.remnawave
     version: ">=0.1.0"
+    source: https://galaxy.ansible.com
+```
+
+Then install:
+
+```bash
+ansible-galaxy collection install -r requirements.yml
 ```
 
 ## Quick Start
@@ -213,5 +224,6 @@ MIT
 
 ## Links
 
+- [Ansible Galaxy](https://galaxy.ansible.com/ui/repo/published/ilyagulya/remnawave/)
 - [Remnawave Panel](https://github.com/remnawave/panel)
 - [Remnawave Panel Docs](https://docs.rw/)
