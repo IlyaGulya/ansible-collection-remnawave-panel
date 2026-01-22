@@ -372,17 +372,17 @@ def run_module():
         # Resolve inbound tags to UUIDs if specified
         profile_uuid = module.params["config_profile"].get("active_config_profile_uuid")
         inbound_tags = cp.get("active_inbound_tags")
-        inbound_uuids = cp.get("active_inbounds")
+        inbound_uuids = cp.get("active_inbound_uuids")
 
         if inbound_tags and inbound_uuids:
-            module.fail_json(msg="Cannot specify both active_inbound_tags and active_inbounds")
+            module.fail_json(msg="Cannot specify both active_inbound_tags and active_inbound_uuids")
 
         if inbound_tags:
             if not profile_uuid:
                 module.fail_json(msg="active_inbound_tags requires active_config_profile or active_config_profile_uuid")
             try:
                 resolved_uuids = resolve_inbound_uuids(client, profile_uuid, inbound_tags)
-                module.params["config_profile"]["active_inbounds"] = resolved_uuids
+                module.params["config_profile"]["active_inbound_uuids"] = resolved_uuids
                 del module.params["config_profile"]["active_inbound_tags"]
             except ValueError as e:
                 module.fail_json(msg=str(e))

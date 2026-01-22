@@ -49,7 +49,7 @@
         port: "{{ '{{' }} node_port {{ '}}' }}"
         config_profile:
           active_config_profile_uuid: "{{ '{{' }} profile_uuid {{ '}}' }}"
-          active_inbounds:
+          active_inbound_uuids:
             - "{{ '{{' }} inbound_uuid {{ '}}' }}"
       register: node_result
 

@@ -177,7 +177,7 @@ See `vars/production_vars.yml` for production-like configuration including:
 4. **Inbound Reference**: You can reference inbounds by UUID or by tag name:
    ```yaml
    # By UUID
-   active_inbounds:
+   active_inbound_uuids:
      - "uuid-here"
 
    # By tag name (more readable)

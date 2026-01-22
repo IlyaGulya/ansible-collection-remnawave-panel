@@ -12,7 +12,7 @@
     address: "10.0.0.200"
     config_profile:
       active_config_profile_uuid: "{{ profile_uuid }}"
-      active_inbounds:
+      active_inbound_uuids:
         - "{{ inbound_uuid }}"
   ignore_errors: true
   register: short_name_error_result
@@ -37,7 +37,7 @@
     port: 443
     config_profile:
       active_config_profile: "E2E Test Profile"
-      active_inbounds:
+      active_inbound_uuids:
         - "{{ inbound_uuid }}"
   register: name_lookup_result
 
@@ -58,7 +58,7 @@
     port: 443
     config_profile:
       active_config_profile: "E2E Test Profile"
-      active_inbounds:
+      active_inbound_uuids:
         - "{{ inbound_uuid }}"
   register: name_lookup_idempotent
 
@@ -78,7 +78,7 @@
     port: 443
     config_profile:
       active_config_profile: "Nonexistent Profile Name"
-      active_inbounds: []
+      active_inbound_uuids: []
   ignore_errors: true
   register: not_found_result
 

@@ -13,7 +13,7 @@
     port: 443
     config_profile:
       active_config_profile_uuid: "{{ profile_uuid }}"
-      active_inbounds:
+      active_inbound_uuids:
         - "{{ inbound_uuid }}"
   register: create_node_result
 
@@ -34,7 +34,7 @@
     port: 443
     config_profile:
       active_config_profile_uuid: "{{ profile_uuid }}"
-      active_inbounds:
+      active_inbound_uuids:
         - "{{ inbound_uuid }}"
   register: idempotent_node_result
 
@@ -58,7 +58,7 @@
     port: 443
     config_profile:
       active_config_profile_uuid: "{{ profile_uuid }}"
-      active_inbounds:
+      active_inbound_uuids:
         - "{{ inbound_uuid }}"
   register: update_node_result
 
@@ -78,7 +78,7 @@
     port: 443
     config_profile:
       active_config_profile_uuid: "{{ profile_uuid }}"
-      active_inbounds:
+      active_inbound_uuids:
         - "{{ inbound_uuid }}"
   register: update_node_idempotent_result
 
@@ -113,7 +113,7 @@
     consumption_multiplier: 1.5
     config_profile:
       active_config_profile_uuid: "{{ profile_uuid }}"
-      active_inbounds:
+      active_inbound_uuids:
         - "{{ inbound_uuid }}"
   register: full_params_node_result
 
@@ -147,7 +147,7 @@
     consumption_multiplier: 1.5
     config_profile:
       active_config_profile_uuid: "{{ profile_uuid }}"
-      active_inbounds:
+      active_inbound_uuids:
         - "{{ inbound_uuid }}"
   register: full_params_idempotent_result
 
@@ -173,7 +173,7 @@
     consumption_multiplier: 1.5
     config_profile:
       active_config_profile_uuid: "{{ profile_uuid }}"
-      active_inbounds:
+      active_inbound_uuids:
         - "{{ inbound_uuid }}"
   register: update_traffic_result
 
@@ -200,7 +200,7 @@
     port: 443
     config_profile:
       active_config_profile_uuid: "{{ profile_uuid }}"
-      active_inbounds:
+      active_inbound_uuids:
         - "{{ inbound_uuid }}"
   check_mode: true
   register: check_mode_create_node_result
@@ -241,7 +241,7 @@
     port: 443
     config_profile:
       active_config_profile_uuid: "{{ profile_uuid }}"
-      active_inbounds:
+      active_inbound_uuids:
         - "{{ inbound_uuid }}"
   check_mode: true
   register: check_mode_update_node_result
@@ -284,7 +284,7 @@
     port: 443
     config_profile:
       active_config_profile_uuid: "{{ profile_uuid }}"
-      active_inbounds:
+      active_inbound_uuids:
         - "{{ inbound_uuid }}"
   register: verify_node_still_exists
 
@@ -309,7 +309,7 @@
     port: 443
     config_profile:
       active_config_profile_uuid: "{{ profile_uuid }}"
-      active_inbounds:
+      active_inbound_uuids:
         - "{{ inbound_uuid }}"
   register: node_uuid_lookup_result
 

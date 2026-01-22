@@ -82,7 +82,7 @@
         consumption_multiplier: "{{ '{{' }} traffic_settings.consumption_multiplier | default(omit) {{ '}}' }}"
         config_profile:
           active_config_profile_uuid: "{{ '{{' }} profile_lookup[item.profile].uuid {{ '}}' }}"
-          active_inbounds:
+          active_inbound_uuids:
             - "{{ '{{' }} profile_lookup[item.profile].inbound_uuid {{ '}}' }}"
       loop: "{{ '{{' }} nodes {{ '}}' }}"
       loop_control:
