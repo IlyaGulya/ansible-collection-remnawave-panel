@@ -72,11 +72,17 @@ module_overrides:
       - nodes
     example_values:
       config:
-        inbounds:
-          - tag: "vless-tcp"
-            port: 443
-            protocol: "vless"
-            settings: { "clients": [], "decryption": "none" }
-        outbounds:
-          - { "tag": "DIRECT", "protocol": "freedom" }
-        routing: { "rules": [] }
+        {
+          "inbounds": [
+            {
+              "tag": "vless-tcp",
+              "port": 443,
+              "protocol": "vless",
+              "settings": { "clients": [], "decryption": "none" }
+            }
+          ],
+          "outbounds": [
+            { "tag": "DIRECT", "protocol": "freedom" }
+          ],
+          "routing": { "rules": [] }
+        }

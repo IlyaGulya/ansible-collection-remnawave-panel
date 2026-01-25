@@ -168,12 +168,21 @@ Useful locations:
 
 ## Documentation Style
 
-### Xray Config Format
+### Xray Config Format — MANDATORY
 
-When writing examples that include Xray configuration (the `config` parameter with inbounds, outbounds, routing), always use JSON syntax (as a YAML object, not a string). This matches how Xray configs are typically written and makes examples more recognizable to users familiar with Xray.
+**IMPORTANT: This rule applies to EVERY location where Xray configuration appears:**
+- Example playbooks (`examples/*.yml`)
+- API reference (`docs/api_reference/*.yml`)
+- Generator config (`src/remnawave_ansible_gen/config.yaml` — `example_values.config`)
+- README files
+- Any other documentation or code that shows Xray config
+
+**ALWAYS format Xray configuration (the `config` parameter containing inbounds, outbounds, routing) as a JSON object in YAML, NOT as a native YAML object.**
+
+This means using curly braces `{}`, square brackets `[]`, and quoted keys `"key"`. This matches how Xray configs are typically written and makes examples recognizable to users familiar with Xray.
 
 ```yaml
-# Good - JSON syntax for entire config
+# CORRECT - JSON syntax (curly braces, quoted keys)
 - name: Create config profile
   ilyagulya.remnawave.config_profile:
     state: present
@@ -187,10 +196,14 @@ When writing examples that include Xray configuration (the `config` parameter wi
             "port": 443,
             "settings": {}
           }
-        ]
+        ],
+        "outbounds": [
+          { "tag": "DIRECT", "protocol": "freedom" }
+        ],
+        "routing": { "rules": [] }
       }
 
-# Bad - YAML format for config
+# WRONG - Native YAML format (no braces, unquoted keys)
 - name: Create config profile
   ilyagulya.remnawave.config_profile:
     state: present
@@ -202,3 +215,8 @@ When writing examples that include Xray configuration (the `config` parameter wi
           port: 443
           settings: {}
 ```
+
+**Why JSON format?**
+1. Xray documentation uses JSON — users copy-paste from Xray docs
+2. Visual distinction — `config:` block is clearly "Xray territory"
+3. Consistency — all examples look the same regardless of author
