@@ -139,9 +139,6 @@ jobs:
           cache: true
           environments: dev
 
-      - name: Install community.docker collection
-        run: pixi run ansible-galaxy collection install community.docker
-
       - name: Run E2E tests
         run: pixi run molecule-test
 
