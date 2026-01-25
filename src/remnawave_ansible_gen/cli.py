@@ -8,9 +8,9 @@ from pathlib import Path
 
 import yaml
 
+from .api_reference import list_api_reference_files, render_api_reference
 from .config import load_config, load_openapi_spec
 from .discovery import discover_resources, discovered_to_module_config
-from .examples import list_example_files, render_examples
 from .rendering import create_jinja_environment, format_code, render_module, render_module_utils
 from .utils import extract_api_version, read_pyproject_version
 
@@ -63,14 +63,14 @@ def main() -> int:
             print(f"    endpoints: {list(resource.endpoints.keys())}")
             print(f"    read_only_fields: {resource.read_only_fields[:5]}...")
 
-        # List example files that would be generated
-        examples_config = config.get("examples", {})
-        if examples_config.get("enabled", True):
-            examples_dir = config.get("examples", {}).get("output_dir", "ansible_collections/ilyagulya/remnawave/examples")
-            example_files = list_example_files(resources)
-            print(f"\nExample files to generate in {examples_dir}/:")
-            for example_file in example_files:
-                print(f"  - {example_file}")
+        # List API reference files that would be generated
+        api_ref_dir = config.get("api_reference", {}).get(
+            "output_dir", "ansible_collections/ilyagulya/remnawave/docs/api_reference"
+        )
+        api_ref_files = list_api_reference_files(resources)
+        print(f"\nAPI reference files to generate in {api_ref_dir}/:")
+        for ref_file in api_ref_files:
+            print(f"  - {ref_file}")
 
         return 0
 
@@ -120,18 +120,19 @@ def main() -> int:
             print(f"  -> Error generating {module_name}: {e}")
             return 1
 
-    # Generate example playbooks
-    examples_config = config.get("examples", {})
-    if examples_config.get("enabled", True):
-        examples_dir = project_root / examples_config.get("output_dir", "ansible_collections/ilyagulya/remnawave/examples")
-        print(f"\nGenerating example playbooks in {examples_dir}...")
-        try:
-            generated_examples = render_examples(env, resources, examples_dir, spec, config)
-            for example_path in generated_examples:
-                print(f"  -> Generated {example_path}")
-        except Exception as e:
-            print(f"  -> Error generating examples: {e}")
-            return 1
+    # Generate API reference
+    api_ref_config = config.get("api_reference", {})
+    api_ref_output = project_root / api_ref_config.get(
+        "output_dir", "ansible_collections/ilyagulya/remnawave/docs/api_reference"
+    )
+    print(f"\nGenerating API reference in {api_ref_output}...")
+    try:
+        generated_refs = render_api_reference(env, resources, api_ref_output, spec, config)
+        for ref_path in generated_refs:
+            print(f"  -> Generated {ref_path}")
+    except Exception as e:
+        print(f"  -> Error generating API reference: {e}")
+        return 1
 
     # Generate version_info.yml manifest
     meta_dir = project_root / "ansible_collections" / "ilyagulya" / "remnawave" / "meta"

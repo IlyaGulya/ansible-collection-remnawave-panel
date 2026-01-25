@@ -3,10 +3,9 @@ general:
   output_dir: "ansible_collections/ilyagulya/remnawave/plugins/modules"
   module_utils_dir: "ansible_collections/ilyagulya/remnawave/plugins/module_utils"
 
-# Example playbook generation settings
-examples:
-  output_dir: "ansible_collections/ilyagulya/remnawave/examples"
-  enabled: true
+# API reference generation settings
+api_reference:
+  output_dir: "ansible_collections/ilyagulya/remnawave/docs/api_reference"
 
 # Global read-only fields excluded from comparison during idempotency checks
 # These are merged with auto-discovered and per-module fields
@@ -58,6 +57,11 @@ module_overrides:
     # original_api_name: user_friendly_name
     field_renames:
       active_inbounds: active_inbound_uuids
+    example_values:
+      config_profile:
+        active_config_profile: "My Profile"
+        active_inbound_tags:
+          - "vless-tcp"
 
   config_profile:
     description: Manage Remnawave panel configuration profiles
@@ -66,3 +70,13 @@ module_overrides:
       - nodesCount
       - inbounds
       - nodes
+    example_values:
+      config:
+        inbounds:
+          - tag: "vless-tcp"
+            port: 443
+            protocol: "vless"
+            settings: { "clients": [], "decryption": "none" }
+        outbounds:
+          - { "tag": "DIRECT", "protocol": "freedom" }
+        routing: { "rules": [] }

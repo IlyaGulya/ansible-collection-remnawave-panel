@@ -1,0 +1,75 @@
+# Single node setup — one config profile + one node
+# This is the simplest topology: direct access via a single VLESS endpoint.
+---
+- name: Single node setup
+  hosts: localhost
+  gather_facts: false
+  vars:
+    panel_url: "https://panel.example.com"
+    api_token: "{{ lookup('env', 'REMNAWAVE_API_TOKEN') }}"
+
+  tasks:
+    - name: Create config profile
+      ilyagulya.remnawave.config_profile:
+        panel_url: "{{ panel_url }}"
+        api_token: "{{ api_token }}"
+        state: present
+        name: "direct-vless"
+        config:
+          {
+            "inbounds": [
+              {
+                "tag": "vless-tcp",
+                "port": 443,
+                "protocol": "vless",
+                "settings": { "clients": [], "decryption": "none" },
+                "streamSettings": {
+                  "network": "tcp",
+                  "security": "reality",
+                  "realitySettings": {
+                    "show": false,
+                    "dest": "www.google.com:443",
+                    "serverNames": ["www.google.com"],
+                    "privateKey": "YOUR_PRIVATE_KEY",
+                    "shortIds": ["abcdef0123456789"]
+                  }
+                },
+                "sniffing": {
+                  "enabled": true,
+                  "destOverride": ["http", "tls", "quic"]
+                }
+              }
+            ],
+            "outbounds": [
+              { "tag": "DIRECT", "protocol": "freedom" },
+              { "tag": "BLOCK", "protocol": "blackhole" }
+            ],
+            "routing": {
+              "domainStrategy": "AsIs",
+              "rules": [
+                {
+                  "type": "field",
+                  "outboundTag": "BLOCK",
+                  "protocol": ["bittorrent"]
+                }
+              ]
+            }
+          }
+
+    - name: Create node
+      ilyagulya.remnawave.node:
+        panel_url: "{{ panel_url }}"
+        api_token: "{{ api_token }}"
+        state: present
+        name: "de-node-01"
+        address: "203.0.113.10"
+        port: 443
+        country_code: "DE"
+        is_traffic_tracking_active: true
+        traffic_limit_bytes: 107374182400  # 100 GB
+        notify_percent: 80
+        traffic_reset_day: 1
+        config_profile:
+          active_config_profile: "direct-vless"
+          active_inbound_tags:
+            - "vless-tcp"

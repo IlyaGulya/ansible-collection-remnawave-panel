@@ -1,7 +1,0 @@
-name: "{{ node_name }}"
-address: "{{ node_address }}"
-port: "{{ node_port }}"
-config_profile:
-  active_config_profile: "{{ config_profile_name }}"
-  active_inbound_tags:
-    - "MainInbound"

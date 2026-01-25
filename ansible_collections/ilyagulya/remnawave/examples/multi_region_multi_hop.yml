@@ -1,0 +1,235 @@
+# Multi-region multi-hop setup
+# Multiple exit nodes across regions, each with a dedicated relay node.
+# Traffic flow: Client → Relay (RU) → Exit (DE/NL/US) → Internet
+---
+- name: Multi-region multi-hop infrastructure
+  hosts: localhost
+  gather_facts: false
+  vars:
+    panel_url: "https://panel.example.com"
+    api_token: "{{ lookup('env', 'REMNAWAVE_API_TOKEN') }}"
+
+    # Exit nodes — each gets its own config profile
+    exit_nodes:
+      - name: "exit-de-01"
+        address: "203.0.113.10"
+        port: 443
+        country_code: "DE"
+        profile_name: "exit-de"
+        private_key: "DE_EXIT_PRIVATE_KEY"
+        public_key: "DE_EXIT_PUBLIC_KEY"
+        short_id: "de01abcdef123456"
+
+      - name: "exit-nl-01"
+        address: "203.0.113.20"
+        port: 443
+        country_code: "NL"
+        profile_name: "exit-nl"
+        private_key: "NL_EXIT_PRIVATE_KEY"
+        public_key: "NL_EXIT_PUBLIC_KEY"
+        short_id: "nl01abcdef123456"
+
+      - name: "exit-us-01"
+        address: "203.0.113.30"
+        port: 443
+        country_code: "US"
+        profile_name: "exit-us"
+        private_key: "US_EXIT_PRIVATE_KEY"
+        public_key: "US_EXIT_PUBLIC_KEY"
+        short_id: "us01abcdef123456"
+
+    # Relay nodes — each points to one exit node
+    relay_nodes:
+      - name: "relay-ru-de-01"
+        address: "198.51.100.10"
+        port: 443
+        country_code: "RU"
+        exit_profile: "exit-de"
+        exit_address: "203.0.113.10"
+        exit_port: 443
+        exit_public_key: "DE_EXIT_PUBLIC_KEY"
+        exit_short_id: "de01abcdef123456"
+        private_key: "RU_DE_RELAY_PRIVATE_KEY"
+        short_id: "rude01abcdef1234"
+
+      - name: "relay-ru-nl-01"
+        address: "198.51.100.20"
+        port: 443
+        country_code: "RU"
+        exit_profile: "exit-nl"
+        exit_address: "203.0.113.20"
+        exit_port: 443
+        exit_public_key: "NL_EXIT_PUBLIC_KEY"
+        exit_short_id: "nl01abcdef123456"
+        private_key: "RU_NL_RELAY_PRIVATE_KEY"
+        short_id: "runl01abcdef1234"
+
+      - name: "relay-ru-us-01"
+        address: "198.51.100.30"
+        port: 443
+        country_code: "RU"
+        exit_profile: "exit-us"
+        exit_address: "203.0.113.30"
+        exit_port: 443
+        exit_public_key: "US_EXIT_PUBLIC_KEY"
+        exit_short_id: "us01abcdef123456"
+        private_key: "RU_US_RELAY_PRIVATE_KEY"
+        short_id: "ruus01abcdef1234"
+
+  tasks:
+    # --- Exit profiles (one per region) ---
+    - name: Create exit profiles
+      ilyagulya.remnawave.config_profile:
+        panel_url: "{{ panel_url }}"
+        api_token: "{{ api_token }}"
+        state: present
+        name: "{{ item.profile_name }}"
+        config:
+          {
+            "inbounds": [
+              {
+                "tag": "vless-tcp",
+                "port": "{{ item.port }}",
+                "protocol": "vless",
+                "settings": { "clients": [], "decryption": "none" },
+                "streamSettings": {
+                  "network": "tcp",
+                  "security": "reality",
+                  "realitySettings": {
+                    "show": false,
+                    "dest": "www.google.com:443",
+                    "serverNames": ["www.google.com"],
+                    "privateKey": "{{ item.private_key }}",
+                    "shortIds": ["{{ item.short_id }}"]
+                  }
+                },
+                "sniffing": {
+                  "enabled": true,
+                  "destOverride": ["http", "tls", "quic"]
+                }
+              }
+            ],
+            "outbounds": [
+              { "tag": "DIRECT", "protocol": "freedom" },
+              { "tag": "BLOCK", "protocol": "blackhole" }
+            ],
+            "routing": {
+              "domainStrategy": "AsIs",
+              "rules": [
+                {
+                  "type": "field",
+                  "outboundTag": "BLOCK",
+                  "protocol": ["bittorrent"]
+                }
+              ]
+            }
+          }
+      loop: "{{ exit_nodes }}"
+
+    # --- Relay profiles (one per relay→exit pair) ---
+    - name: Create relay profiles
+      ilyagulya.remnawave.config_profile:
+        panel_url: "{{ panel_url }}"
+        api_token: "{{ api_token }}"
+        state: present
+        name: "relay-to-{{ item.exit_profile }}"
+        config:
+          {
+            "inbounds": [
+              {
+                "tag": "vless-tcp",
+                "port": "{{ item.port }}",
+                "protocol": "vless",
+                "settings": { "clients": [], "decryption": "none" },
+                "streamSettings": {
+                  "network": "tcp",
+                  "security": "reality",
+                  "realitySettings": {
+                    "show": false,
+                    "dest": "www.google.com:443",
+                    "serverNames": ["www.google.com"],
+                    "privateKey": "{{ item.private_key }}",
+                    "shortIds": ["{{ item.short_id }}"]
+                  }
+                },
+                "sniffing": {
+                  "enabled": true,
+                  "destOverride": ["http", "tls", "quic"]
+                }
+              }
+            ],
+            "outbounds": [
+              {
+                "tag": "upstream",
+                "protocol": "vless",
+                "settings": {
+                  "vnext": [
+                    {
+                      "address": "{{ item.exit_address }}",
+                      "port": "{{ item.exit_port }}",
+                      "users": [{ "id": "PLACEHOLDER_UUID", "encryption": "none" }]
+                    }
+                  ]
+                },
+                "streamSettings": {
+                  "network": "tcp",
+                  "security": "reality",
+                  "realitySettings": {
+                    "fingerprint": "chrome",
+                    "serverName": "www.google.com",
+                    "publicKey": "{{ item.exit_public_key }}",
+                    "shortId": "{{ item.exit_short_id }}"
+                  }
+                }
+              },
+              { "tag": "BLOCK", "protocol": "blackhole" }
+            ],
+            "routing": {
+              "domainStrategy": "AsIs",
+              "rules": [
+                {
+                  "type": "field",
+                  "outboundTag": "BLOCK",
+                  "protocol": ["bittorrent"]
+                },
+                {
+                  "type": "field",
+                  "outboundTag": "upstream",
+                  "inboundTag": ["vless-tcp"]
+                }
+              ]
+            }
+          }
+      loop: "{{ relay_nodes }}"
+
+    # --- Exit nodes ---
+    - name: Create exit nodes
+      ilyagulya.remnawave.node:
+        panel_url: "{{ panel_url }}"
+        api_token: "{{ api_token }}"
+        state: present
+        name: "{{ item.name }}"
+        address: "{{ item.address }}"
+        port: "{{ item.port }}"
+        country_code: "{{ item.country_code }}"
+        config_profile:
+          active_config_profile: "{{ item.profile_name }}"
+          active_inbound_tags:
+            - "vless-tcp"
+      loop: "{{ exit_nodes }}"
+
+    # --- Relay nodes ---
+    - name: Create relay nodes
+      ilyagulya.remnawave.node:
+        panel_url: "{{ panel_url }}"
+        api_token: "{{ api_token }}"
+        state: present
+        name: "{{ item.name }}"
+        address: "{{ item.address }}"
+        port: "{{ item.port }}"
+        country_code: "{{ item.country_code }}"
+        config_profile:
+          active_config_profile: "relay-to-{{ item.exit_profile }}"
+          active_inbound_tags:
+            - "vless-tcp"
+      loop: "{{ relay_nodes }}"

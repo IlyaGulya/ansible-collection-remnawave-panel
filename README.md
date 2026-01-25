@@ -165,27 +165,10 @@ Create an API token in the Remnawave panel under Settings > API Tokens.
     REMNAWAVE_API_TOKEN: "{{ vault_api_token }}"
 ```
 
-### Node Traffic Tracking
+### More
 
-The `node` module supports traffic tracking parameters:
-
-```yaml
-- name: Create node with traffic limits
-  ilyagulya.remnawave.node:
-    state: present
-    name: "edge-server-1"
-    address: "192.168.1.100"
-    config_profile:
-      active_config_profile: "production-config"
-      active_inbound_tags:
-        - "vless-tcp"
-    is_traffic_tracking_active: true
-    traffic_limit_bytes: 107374182400  # 100 GB
-    notify_percent: 80                  # Alert at 80% usage
-    traffic_reset_day: 1                # Reset on 1st of month
-```
-
-For more examples including workflows, multi-region deployments, and production patterns, see the [examples directory](ansible_collections/ilyagulya/remnawave/examples/).
+- [Examples](ansible_collections/ilyagulya/remnawave/examples/) — real-world playbooks (single node, multi-hop, multi-region)
+- [API Reference](ansible_collections/ilyagulya/remnawave/docs/api_reference/) — every module option with constraints and example values
 
 ## Common Parameters
 

@@ -1,2 +1,0 @@
-name: "{{ config_profile_name }}"
-config: "{{ xray_config }}"

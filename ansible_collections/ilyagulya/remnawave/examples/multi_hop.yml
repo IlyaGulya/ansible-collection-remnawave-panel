@@ -1,0 +1,164 @@
+# Multi-hop setup — relay (RU) chains through exit (DE)
+# Traffic flow: Client → Relay (RU) → Exit (DE) → Internet
+---
+- name: Multi-hop node chain
+  hosts: localhost
+  gather_facts: false
+  vars:
+    panel_url: "https://panel.example.com"
+    api_token: "{{ lookup('env', 'REMNAWAVE_API_TOKEN') }}"
+    exit_address: "203.0.113.10"
+    exit_port: 443
+
+  tasks:
+    # --- Exit node profile: accepts traffic and forwards to internet ---
+    - name: Create exit profile
+      ilyagulya.remnawave.config_profile:
+        panel_url: "{{ panel_url }}"
+        api_token: "{{ api_token }}"
+        state: present
+        name: "exit-de"
+        config:
+          {
+            "inbounds": [
+              {
+                "tag": "vless-tcp",
+                "port": 443,
+                "protocol": "vless",
+                "settings": { "clients": [], "decryption": "none" },
+                "streamSettings": {
+                  "network": "tcp",
+                  "security": "reality",
+                  "realitySettings": {
+                    "show": false,
+                    "dest": "www.google.com:443",
+                    "serverNames": ["www.google.com"],
+                    "privateKey": "EXIT_PRIVATE_KEY",
+                    "shortIds": ["abcdef0123456789"]
+                  }
+                },
+                "sniffing": {
+                  "enabled": true,
+                  "destOverride": ["http", "tls", "quic"]
+                }
+              }
+            ],
+            "outbounds": [
+              { "tag": "DIRECT", "protocol": "freedom" },
+              { "tag": "BLOCK", "protocol": "blackhole" }
+            ],
+            "routing": {
+              "domainStrategy": "AsIs",
+              "rules": [
+                {
+                  "type": "field",
+                  "outboundTag": "BLOCK",
+                  "protocol": ["bittorrent"]
+                }
+              ]
+            }
+          }
+
+    # --- Relay node profile: accepts client traffic and forwards to exit ---
+    - name: Create relay profile
+      ilyagulya.remnawave.config_profile:
+        panel_url: "{{ panel_url }}"
+        api_token: "{{ api_token }}"
+        state: present
+        name: "relay-ru-to-de"
+        config:
+          {
+            "inbounds": [
+              {
+                "tag": "vless-tcp",
+                "port": 443,
+                "protocol": "vless",
+                "settings": { "clients": [], "decryption": "none" },
+                "streamSettings": {
+                  "network": "tcp",
+                  "security": "reality",
+                  "realitySettings": {
+                    "show": false,
+                    "dest": "www.google.com:443",
+                    "serverNames": ["www.google.com"],
+                    "privateKey": "RELAY_PRIVATE_KEY",
+                    "shortIds": ["fedcba9876543210"]
+                  }
+                },
+                "sniffing": {
+                  "enabled": true,
+                  "destOverride": ["http", "tls", "quic"]
+                }
+              }
+            ],
+            "outbounds": [
+              {
+                "tag": "exit-de",
+                "protocol": "vless",
+                "settings": {
+                  "vnext": [
+                    {
+                      "address": "{{ exit_address }}",
+                      "port": "{{ exit_port }}",
+                      "users": [{ "id": "PLACEHOLDER_UUID", "encryption": "none" }]
+                    }
+                  ]
+                },
+                "streamSettings": {
+                  "network": "tcp",
+                  "security": "reality",
+                  "realitySettings": {
+                    "fingerprint": "chrome",
+                    "serverName": "www.google.com",
+                    "publicKey": "EXIT_PUBLIC_KEY",
+                    "shortId": "abcdef0123456789"
+                  }
+                }
+              },
+              { "tag": "BLOCK", "protocol": "blackhole" }
+            ],
+            "routing": {
+              "domainStrategy": "AsIs",
+              "rules": [
+                {
+                  "type": "field",
+                  "outboundTag": "BLOCK",
+                  "protocol": ["bittorrent"]
+                },
+                {
+                  "type": "field",
+                  "outboundTag": "exit-de",
+                  "inboundTag": ["vless-tcp"]
+                }
+              ]
+            }
+          }
+
+    # --- Nodes ---
+    - name: Create exit node (DE)
+      ilyagulya.remnawave.node:
+        panel_url: "{{ panel_url }}"
+        api_token: "{{ api_token }}"
+        state: present
+        name: "exit-de-01"
+        address: "{{ exit_address }}"
+        port: "{{ exit_port }}"
+        country_code: "DE"
+        config_profile:
+          active_config_profile: "exit-de"
+          active_inbound_tags:
+            - "vless-tcp"
+
+    - name: Create relay node (RU)
+      ilyagulya.remnawave.node:
+        panel_url: "{{ panel_url }}"
+        api_token: "{{ api_token }}"
+        state: present
+        name: "relay-ru-01"
+        address: "198.51.100.20"
+        port: 443
+        country_code: "RU"
+        config_profile:
+          active_config_profile: "relay-ru-to-de"
+          active_inbound_tags:
+            - "vless-tcp"

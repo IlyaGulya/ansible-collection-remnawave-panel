@@ -48,6 +48,11 @@ ansible-galaxy collection install -r requirements.yml
         - "vless-tcp"                       # Reference by tag
 ```
 
+## Documentation
+
+- [Examples](examples/) — real-world playbooks (single node, multi-hop, multi-region)
+- [API Reference](docs/api_reference/) — every module option with constraints and example values
+
 ## Requirements
 
 - Ansible >= 2.15
