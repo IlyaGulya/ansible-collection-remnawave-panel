@@ -164,11 +164,11 @@ request_method:
 from ansible.module_utils.basic import AnsibleModule, env_fallback
 
 from ansible_collections.ilyagulya.remnawave.plugins.module_utils.remnawave import (
-    RemnawaveAPIError,
     RemnawaveClient,
-    camel_to_snake_dict,
+    RemnawaveAPIError,
     recursive_diff,
     snake_to_camel_dict,
+    camel_to_snake_dict,
 )
 
 
@@ -199,6 +199,7 @@ def run_module():
         api_token=dict(type="str", required=True, no_log=True, fallback=(env_fallback, ["REMNAWAVE_API_TOKEN"])),
         validate_certs=dict(type="bool", default=True),
         timeout=dict(type="int", default=30),
+        extra_headers=dict(type="dict", default={}, no_log=True),
         state=dict(type="str", default="present", choices=["present", "absent"]),
         uuid=dict(type="str", required=False),
         name=dict(
@@ -218,7 +219,8 @@ def run_module():
     ]
 
     # Field aliases for nested dict conversion (user-facing camelCase -> API camelCase)
-    field_aliases = {}
+    field_aliases = {
+    }
 
     module = AnsibleModule(
         argument_spec=module_args,
@@ -234,6 +236,7 @@ def run_module():
         api_token=module.params["api_token"],
         validate_certs=module.params["validate_certs"],
         timeout=module.params["timeout"],
+        extra_headers=module.params.get("extra_headers") or {},
     )
 
     state = module.params["state"]

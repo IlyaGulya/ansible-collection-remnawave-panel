@@ -15,8 +15,8 @@ __metaclass__ = type
 import json
 import re
 
-from ansible.module_utils.six.moves.urllib.error import HTTPError, URLError
 from ansible.module_utils.urls import open_url
+from ansible.module_utils.six.moves.urllib.error import HTTPError, URLError
 
 
 class RemnawaveAPIError(Exception):
@@ -148,12 +148,13 @@ def _lists_equal(list1, list2):
 class RemnawaveClient:
     """HTTP client for Remnawave API."""
 
-    def __init__(self, panel_url, api_token, validate_certs=True, timeout=30):
+    def __init__(self, panel_url, api_token, validate_certs=True, timeout=30, extra_headers=None):
         """Initialize the client."""
         self.panel_url = panel_url.rstrip("/")
         self.api_token = api_token
         self.validate_certs = validate_certs
         self.timeout = timeout
+        self.extra_headers = extra_headers or {}
 
     def _request(self, method, path, data=None):
         """Make an HTTP request to the API."""
@@ -163,6 +164,7 @@ class RemnawaveClient:
             "Content-Type": "application/json",
             "Accept": "application/json",
         }
+        headers.update(self.extra_headers)
 
         body = None
         if data is not None:
